@@ -35,6 +35,7 @@ lv2:port [
 ] ;
 ```
 
+<!--
 #### [lv2:freeWheeling](http://lv2plug.in/ns/lv2core#freeWheeling)
 
 boolean for offline rendering state; 1 means offline, 0 means realtime; unused in Anagram so far
@@ -58,6 +59,7 @@ lv2:port [
   lv2:maximum 1 ;
 ] ;
 ```
+-->
 
 #### [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset) trigger for clearing old buffers when changing presets
 
@@ -83,6 +85,7 @@ lv2:port [
 ] ;
 ```
 
+<!--
 #### [time:beatsPerBar](http://lv2plug.in/ns/ext/time#beatsPerBar)
 
 integer value in 1-16 range for beats per bar or time signature "numerator"; unused in Anagram so far
@@ -103,6 +106,7 @@ lv2:port [
   lv2:maximum 16 ;
 ] ;
 ```
+-->
 
 #### [time:beatsPerMinute](http://lv2plug.in/ns/ext/time#beatsPerMinute)
 
@@ -124,6 +128,7 @@ lv2:port [
 ] ;
 ```
 
+<!--
 #### [time:speed](http://lv2plug.in/ns/ext/time#speed)
 
 regular float for playback speed but always 0 or 1; 0 means "stopped", 1 means "rolling"; unused in Anagram so far
@@ -146,6 +151,7 @@ lv2:port [
   lv2:maximum 1 ;
 ] ;
 ```
+-->
 
 ## Parameter properties
 
@@ -188,7 +194,7 @@ The following control port and/or parameter units are supported:
 | [units:db](http://lv2plug.in/ns/extensions/units#db)                       | Decibels          | `%.1f dB`  |                                       |
 | [units:pc](http://lv2plug.in/ns/extensions/units#pc)                       | Percentage        | `%f %%`    |                                       |
 | [units:hz](http://lv2plug.in/ns/extensions/units#hz)                       | Hertz             | (variable) | Uses `Hz` if < 1000, otherwise `kHz`  |
-| [units:khz](http://lv2plug.in/ns/extensions/units#khz)                     | Kilohertz         | `%f MHz`   |                                       |
+| [units:khz](http://lv2plug.in/ns/extensions/units#khz)                     | Kilohertz         | `%f kHz`   |                                       |
 | [units:mhz](http://lv2plug.in/ns/extensions/units#mhz)                     | Megahertz         | `%f MHz`   |                                       |
 | [units:cent](http://lv2plug.in/ns/extensions/units#cent)                   | Cent              | `%f ct`    |                                       |
 | [units:semitone12TET](http://lv2plug.in/ns/extensions/units#semitone12TET) | Semitone          | `%f semi`  |                                       |
