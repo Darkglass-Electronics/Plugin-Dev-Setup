@@ -122,7 +122,7 @@ lv2:port [
 <!--
 #### [lv2:freeWheeling](http://lv2plug.in/ns/lv2core#freeWheeling)
 
-boolean for offline rendering state; 1 means offline, 0 means realtime; unused in Anagram so far
+Boolean for offline rendering state; 1 means offline, 0 means realtime; unused in Anagram so far
 
 Special rules:
  - Must have default and minimum 0
@@ -145,7 +145,9 @@ lv2:port [
 ```
 -->
 
-#### [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset) trigger for clearing old buffers when changing presets
+#### [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset)
+
+Trigger for clearing old buffers when changing presets
 
 Special rules:
  - Must be trigger
@@ -172,7 +174,7 @@ lv2:port [
 <!--
 #### [time:beatsPerBar](http://lv2plug.in/ns/ext/time#beatsPerBar)
 
-integer value in 1-16 range for beats per bar or time signature "numerator"; unused in Anagram so far
+Integer value in 1-16 range for beats per bar or time signature "numerator"; unused in Anagram so far
 
 ```ttl
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
@@ -194,7 +196,7 @@ lv2:port [
 
 #### [time:beatsPerMinute](http://lv2plug.in/ns/ext/time#beatsPerMinute)
 
-regular float value in 40-300 range for beats per bar
+Regular float value in 40-300 range for beats per bar
 
 ```ttl
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
@@ -215,7 +217,7 @@ lv2:port [
 <!--
 #### [time:speed](http://lv2plug.in/ns/ext/time#speed)
 
-regular float for playback speed but always 0 or 1; 0 means "stopped", 1 means "rolling"; unused in Anagram so far
+Regular float for playback speed but always 0 or 1; 0 means "stopped", 1 means "rolling"; unused in Anagram so far
 
 Special rules:
  - Must have default 0
