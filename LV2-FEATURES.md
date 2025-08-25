@@ -11,7 +11,7 @@ The following control port designations are supported:
 
 > NOTE: the href target is the designation URI, not always a valid URL.
 
-- [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled)
+#### [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled)
 
 Boolean for bypass/enabled state; 1 means enabled, 0 means bypassed
 
@@ -35,7 +35,7 @@ lv2:port [
 ] ;
 ```
 
-- [lv2:freeWheeling](http://lv2plug.in/ns/lv2core#freeWheeling)
+#### [lv2:freeWheeling](http://lv2plug.in/ns/lv2core#freeWheeling)
 
 boolean for offline rendering state; 1 means offline, 0 means realtime; unused in Anagram so far
 
@@ -59,7 +59,7 @@ lv2:port [
 ] ;
 ```
 
-- [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset) trigger for clearing old buffers when changing presets
+#### [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset) trigger for clearing old buffers when changing presets
 
 Special rules:
  - Must be trigger
@@ -83,7 +83,7 @@ lv2:port [
 ] ;
 ```
 
-- [time:beatsPerBar](http://lv2plug.in/ns/ext/time#beatsPerBar)
+#### [time:beatsPerBar](http://lv2plug.in/ns/ext/time#beatsPerBar)
 
 integer value in 1-16 range for beats per bar or time signature "numerator"; unused in Anagram so far
 
@@ -104,7 +104,7 @@ lv2:port [
 ] ;
 ```
 
-- [time:beatsPerMinute](http://lv2plug.in/ns/ext/time#beatsPerMinute)
+#### [time:beatsPerMinute](http://lv2plug.in/ns/ext/time#beatsPerMinute)
 
 regular float value in 40-300 range for beats per bar
 
@@ -124,7 +124,7 @@ lv2:port [
 ] ;
 ```
 
-- [time:speed](http://lv2plug.in/ns/ext/time#speed)
+#### [time:speed](http://lv2plug.in/ns/ext/time#speed)
 
 regular float for playback speed but always 0 or 1; 0 means "stopped", 1 means "rolling"; unused in Anagram so far
 
@@ -153,25 +153,25 @@ The following control port and/or parameter properties are supported:
 
 > NOTE: the href target is the designation URI, not always a valid URL.
 
-- [lv2:toggled](http://lv2plug.in/ns/lv2core#toggled)
+#### [lv2:toggled](http://lv2plug.in/ns/lv2core#toggled)
 
 Makes the parameter appear as a on/off toggle
 
-- [lv2:integer](http://lv2plug.in/ns/lv2core#integer)
+#### [lv2:integer](http://lv2plug.in/ns/lv2core#integer)
 
 Makes the parameter always use real numbers, so advance/decrease in whole steps.
 
-- [lv2:enumeration](http://lv2plug.in/ns/lv2core#enumeration)
+#### [lv2:enumeration](http://lv2plug.in/ns/lv2core#enumeration)
 
 Makes the parameter use a list for selecting the value, restricting it only to the exposed scale points.
 
-- [pprops:logarithmic](http://lv2plug.in/ns/ext/port-props#logarithmic)
+#### [pprops:logarithmic](http://lv2plug.in/ns/ext/port-props#logarithmic)
 
 Makes the parameter advance/decrease in logarithmic scale.
 
 The parameter MUST NOT have 0 as a valid value in its range.
 
-- [pprops:notOnGUI](http://lv2plug.in/ns/ext/port-props#notOnGUI)
+#### [pprops:notOnGUI](http://lv2plug.in/ns/ext/port-props#notOnGUI)
 
 Hides the parameter from the user and does not save it as part of the preset.
 
