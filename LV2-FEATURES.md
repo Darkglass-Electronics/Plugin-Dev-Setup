@@ -181,8 +181,8 @@ The following control port and/or parameter units are supported:
 
 > NOTE: the href target is the designation URI, not always a valid URL.
 
-|----------------------------------------------------------------------------|---------------------|------------|--------------------------------------|
 | URI                                                                        | Name                | printf     | Notes                                |
+|----------------------------------------------------------------------------|---------------------|------------|--------------------------------------|
 | [units:s](http://lv2plug.in/ns/extensions/units#s)                         | Seconds             | `%f s`     |                                      |
 | [units:ms](http://lv2plug.in/ns/extensions/units#ms)                       | Milliseconds        | `%f ms`    |                                      |
 | [units:db](http://lv2plug.in/ns/extensions/units#db)                       | Decibels            | `%.1f dB`  |                                      |
