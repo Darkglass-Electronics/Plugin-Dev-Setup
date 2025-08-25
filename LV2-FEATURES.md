@@ -151,7 +151,7 @@ lv2:port [
 
 The following control port and/or parameter properties are supported:
 
-> NOTE: the href target is the designation URI, not always a valid URL.
+> NOTE: the href target is the property URI, not always a valid URL.
 
 #### [lv2:toggled](http://lv2plug.in/ns/lv2core#toggled)
 
@@ -179,17 +179,17 @@ Hides the parameter from the user and does not save it as part of the preset.
 
 The following control port and/or parameter units are supported:
 
-> NOTE: the href target is the designation URI, not always a valid URL.
+> NOTE: the href target is the unit URI, not always a valid URL.
 
-| URI                                                                        | Name                | printf     | Notes                                |
-|----------------------------------------------------------------------------|---------------------|------------|--------------------------------------|
-| [units:s](http://lv2plug.in/ns/extensions/units#s)                         | Seconds             | `%f s`     |                                      |
-| [units:ms](http://lv2plug.in/ns/extensions/units#ms)                       | Milliseconds        | `%f ms`    |                                      |
-| [units:db](http://lv2plug.in/ns/extensions/units#db)                       | Decibels            | `%.1f dB`  |                                      |
-| [units:pc](http://lv2plug.in/ns/extensions/units#pc)                       | Percentage          | `%f %%`    |                                      |
-| [units:hz](http://lv2plug.in/ns/extensions/units#hz)                       | Hertz               | (variable) | uses `Hz` if < 1000, otherwise `kHz` |
-| [units:khz](http://lv2plug.in/ns/extensions/units#khz)                     | Kilohertz           | `%f MHz`   |                                      |
-| [units:mhz](http://lv2plug.in/ns/extensions/units#mhz)                     | Megahertz           | `%f MHz`   |                                      |
-| [units:cent](http://lv2plug.in/ns/extensions/units#cent)                   | Cent                | `%f ct`    |                                      |
-| [units:semitone12TET](http://lv2plug.in/ns/extensions/units#semitone12TET) | Semitone            | `%f semi`  |                                      |
-| [dgprops:oneDecimalPoint](http://www.darkglass.com/lv2/ns#oneDecimalPoint) | "One Decimal Point" | `%.1f`     |                                      |
+| URI                                                                        | Name              | printf     | Notes                                 |
+|----------------------------------------------------------------------------|-------------------|------------|---------------------------------------|
+| [units:s](http://lv2plug.in/ns/extensions/units#s)                         | Seconds           | `%f s`     |                                       |
+| [units:ms](http://lv2plug.in/ns/extensions/units#ms)                       | Milliseconds      | `%f ms`    |                                       |
+| [units:db](http://lv2plug.in/ns/extensions/units#db)                       | Decibels          | `%.1f dB`  |                                       |
+| [units:pc](http://lv2plug.in/ns/extensions/units#pc)                       | Percentage        | `%f %%`    |                                       |
+| [units:hz](http://lv2plug.in/ns/extensions/units#hz)                       | Hertz             | (variable) | Uses `Hz` if < 1000, otherwise `kHz`  |
+| [units:khz](http://lv2plug.in/ns/extensions/units#khz)                     | Kilohertz         | `%f MHz`   |                                       |
+| [units:mhz](http://lv2plug.in/ns/extensions/units#mhz)                     | Megahertz         | `%f MHz`   |                                       |
+| [units:cent](http://lv2plug.in/ns/extensions/units#cent)                   | Cent              | `%f ct`    |                                       |
+| [units:semitone12TET](http://lv2plug.in/ns/extensions/units#semitone12TET) | Semitone          | `%f semi`  |                                       |
+| [dgprops:oneDecimalPoint](http://www.darkglass.com/lv2/ns#oneDecimalPoint) | One Decimal Point | `%.1f`     | Special unit to force 1 decimal point |
