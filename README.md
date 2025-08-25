@@ -6,8 +6,8 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 ## Under the hood
 
-Developing for Anagram means developing for a Linux-embed arm64 multi-core system.  
-Inside there is a Linux 6.1 kernel with PREEMPT_RT with glibc 2.34.
+Developing for Anagram means developing for a Linux-embed ARMv8.2 64-bit multi-core system, with 4 "little" CPU cores dedicated to system and graphics and 2 "big" CPU cores dedicated to audio.  
+Inside there is a Linux 6.1 PREEMPT_RT kernel with glibc 2.34.
 
 For audio [JACK2](https://jackaudio.org/) runs as the audio server, with [mod-host](https://github.com/mod-audio/mod-host/) on top taking care of plugin loading and management.  
 On top we have our custom UI based on [LVGL](https://lvgl.io/), running on a separate process from the audio server and plugin host.
@@ -18,6 +18,10 @@ We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions
 ## Building
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
+
+## Requirements
+
+See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
 
 ## Caveats
 
@@ -31,6 +35,13 @@ The only supported use of LV2 Parameters right now is in regards of loading of f
 While the system has a screen with custom graphics, there is no display server like X11 or Wayland inside the OS.  
 There are no OpenGL, X11 or Wayland related libraries in the OS.  
 If your plugin binary links against libX11.so for example, it will simply fail to load.
+
+### No GPU
+
+The Anagram hardware does not contain a GPU, so accelerated graphics are not possible.  
+There is a 2D accelerator chip inside, but not enabled at the moment.
+
+We set up LVGL to use 4 rendering threads, matching the 4 "little" cores present on the RK3582 SoM used by the Anagram.
 
 ### No parameter text
 
