@@ -15,11 +15,11 @@ On top we have our custom UI based on [LVGL](https://lvgl.io/), running on a sep
 The only supported plugin format at the moment is [LV2](https://lv2plug.in/).  
 We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions](https://github.com/Darkglass-Electronics/LV2-Extensions/).
 
-## Building
+## Documentation
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
 
-## Requirements
+See [LV2-FEATURES.md](LV2-FEATURES.md) for the list of LV2 features supported by Anagram.
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
 

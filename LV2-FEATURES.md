@@ -5,6 +5,90 @@ Most of official extensions are implemented, with a few custom ones on top as we
 
 NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
 
+## Host features
+
+The following host features (passed during plugin instantiation) are supported:
+
+> NOTE: these are feature URIs, not always valid URLs.
+
+#### [bufsz:boundedBlockLength](http://lv2plug.in/ns/ext/buf-size#boundedBlockLength)
+
+Host provides block length bounds information.
+
+#### [bufsz:fixedBlockLength](http://lv2plug.in/ns/ext/buf-size#fixedBlockLength)
+
+Host uses fixed-size buffers for audio processing.
+
+#### [bufsz:powerOf2BlockLength](http://lv2plug.in/ns/ext/buf-size#powerOf2BlockLength)
+
+Host uses a power-of-2 block size.
+
+#### [log:log](http://lv2plug.in/ns/ext/log#log)
+
+Host provides custom logging mechanism.  
+Not implemented yet, but later on plugin logs will appear on a dedicated screen.
+
+#### [options:options](http://lv2plug.in/ns/ext/options#options)
+
+Host provides some LV2 information to the plugin through the use of "options".
+
+The following options are supported:
+
+###### [bufsz:minBlockLength](http://lv2plug.in/ns/ext/buf-size#minBlockLength)
+
+Host buffers minimum block length, fixed to 16 frames in Anagram.
+
+###### [bufsz:maxBlockLength](http://lv2plug.in/ns/ext/buf-size#maxBlockLength)
+
+Host buffers maximum block length, fixed to 16 frames in Anagram.
+
+###### [bufsz:nomimalBlockLength](http://lv2plug.in/ns/ext/buf-size#nomimalBlockLength)
+
+Host buffers nomimal block length, fixed to 16 frames in Anagram.
+
+###### [threads:schedPolicy](http://ardour.org/lv2/threads/#schedPolicy)
+
+Scheduler policy for audio-related plugin threads, fixed to `SCHED_FIFO` in Anagram.
+
+###### [threads:schedPriority](http://ardour.org/lv2/threads/#schedPriority)
+
+Scheduler priority for audio-related plugin threads, fixed to 56 in Anagram.
+
+###### [jack:client](http://jackaudio.org/metadata/client)
+
+Direct access to the underlying JACK client used by the host for a specific plugin.  
+For very advanced usecases only!
+
+<!--
+#### http://lv2plug.in/ns/ext/state#freePath
+
+Host provides a host-side function to clear memory created during `state:makePath`.
+
+#### http://lv2plug.in/ns/ext/state#makePath
+
+unused in Anagram so far
+-->
+
+#### [urid:map](http://lv2plug.in/ns/ext/urid#map)
+
+Host provides a way to map a URI string into a URID identifier.
+
+#### [urid:unmap](http://lv2plug.in/ns/ext/urid#unmap)
+
+Host provides a way to "unmap" a URID identifier back to its URI string.
+
+#### [worker:interface](http://lv2plug.in/ns/ext/worker#interface)
+
+Host provides worker threads that can be used by plugins in a thread-safe way.
+
+#### http://kx.studio/ns/lv2ext/control-input-port-change-request
+
+Custom LV2 extension from the KXStudio project that allows a plugin to request changes to the value of a control input port.
+
+#### http://moddevices.com/ns/ext/license#feature
+
+Custom LV2 extension from the MOD Devices / MOD Audio project for fetching a commercial plugin license file.
+
 ## Parameter designations
 
 The following control port designations are supported:
