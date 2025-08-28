@@ -24,7 +24,7 @@ jobs:
         with:
           path: |
             ~/mod-workdir
-          key: bootstrap-linux-${{ matrix.container }}-v${{ env.CACHE_VERSION }}
+          key: bootstrap-linux-${{ matrix.platform }}-${{ matrix.container }}-v${{ env.CACHE_VERSION }}
       - name: Install dependencies
         run: |
           apt-get update -qq && apt-get install -yqq \

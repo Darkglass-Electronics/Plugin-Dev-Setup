@@ -30,9 +30,12 @@ We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions
 A special note needs to be given about JUCE.  
 While it does support exporting LV2 plugins, it uses "Patch Parameters" which is not supported in Anagram at the moment.
 
-We are developing a custom alternative LV2 wrapper for JUCE that uses Control Ports plus:
+We have developed a custom alternative LV2 wrapper for JUCE that uses Control Ports plus:
 
  - disables regular X11 UI (we do not use it)
  - only enables the specific features in use by the plugin (e.g. Atom port for time events)
  - has custom Anagram-specific parameter hints
  - is able to get updates on a regular basis without having to update the entire JUCE codebase
+
+This custom LV2 wrapper is available at [github.com/Darkglass-Electronics/juce-anagram-lv2](https://github.com/Darkglass-Electronics/juce-anagram-lv2/).  
+There is a JUCE example using this wrapper plugin under [examples][examples/].
