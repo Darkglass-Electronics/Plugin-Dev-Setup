@@ -113,9 +113,6 @@ Assuming you have an Anagram unit running in Developer Mode, you can just do:
 # cd to where your lv2 bundles are located
 cd /path/to/your/build/output/dir
 
-# ensure user lv2 dir is present
-ssh root@192.168.51.1 "mkdir -p /root/.lv2/"
-
 # copy over lv2 bundles
 scp -O -r *.lv2 root@192.168.51.1:/root/.lv2/
 

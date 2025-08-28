@@ -1,8 +1,18 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Development Setup for Darkglass Anagram
 
 This repository contains documentation and examples related to developing audio plugins for [Darkglass Anagram](https://www.darkglass.com/products/anagram/) as a platform.
 
 NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
+
+## Documentation
+
+See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
+
+See [CAVEATS.md](CAVEATS.md) for a few caveats to be aware of when developing plugins for Anagram.
+
+See [LV2-FEATURES.md](LV2-FEATURES.md) for the list of LV2 features supported by Anagram.
+
+See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
 
 ## Under the hood
 
@@ -14,18 +24,6 @@ On top we have our custom UI based on [LVGL](https://lvgl.io/), running on a sep
 
 The only supported plugin format at the moment is [LV2](https://lv2plug.in/).  
 We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions](https://github.com/Darkglass-Electronics/LV2-Extensions/).
-
-## Documentation
-
-See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
-
-See [LV2-FEATURES.md](LV2-FEATURES.md) for the list of LV2 features supported by Anagram.
-
-See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
-
-## Caveats
-
-See [CAVEATS.md](CAVEATS.md) for a few caveats to be aware of when developing plugins for Anagram.
 
 ## JUCE
 
