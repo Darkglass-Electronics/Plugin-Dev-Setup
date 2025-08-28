@@ -13,9 +13,9 @@ jobs:
       - name: Bootstrap through docker
         shell: bash
         run: |
-          [ "${{ matrix.debug }}" = "true" ] && TAG_SUFFIX="-debug"
+          [ "${{ matrix.debug }}" = "true" ] && debug_suffix="-debug"
           docker buildx build \
             --build-arg debug=${{ matrix.debug }} \
             --build-arg target=full \
-            --tag "darkglass-anagram${TAG_SUFFIX}" \
+            --tag "darkglass-anagram${debug_suffix}" \
             docker

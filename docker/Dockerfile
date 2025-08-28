@@ -47,11 +47,12 @@ RUN ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu --toolchain nightly
 # checkout mod-plugin-builder
 WORKDIR /root
 RUN git clone https://github.com/moddevices/mod-plugin-builder --depth=1
-WORKDIR mod-plugin-builder
 
 # bootstrap mod-plugin-builder target
 RUN if [[ "${debug}" == "true" ]]; then export debug_suffix="-debug"; fi
-RUN ./bootstrap.sh darkglass-anagram${debug_suffix} ${target} && ./.clean-install.sh darkglass-anagram${debug_suffix}
+RUN sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config
+RUN ./mod-plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target} && \
+    ./mod-plugin-builder/.clean-install.sh darkglass-anagram${debug_suffix}
 
 # setup environment for building
 RUN echo "source /root/mod-plugin-builder/local.env darkglass-anagram${debug_suffix}" >> /root/.bashrc

@@ -36,5 +36,5 @@ jobs:
           git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
       - name: Bootstrap toolchain
         run: |
-          sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' ./mod-plugin-builder/toolchain/*.config
+          sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config
           ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }} && ./.clean-install.sh ${{ matrix.platform }}
