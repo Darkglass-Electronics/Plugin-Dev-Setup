@@ -38,4 +38,4 @@ We have developed a custom alternative LV2 wrapper for JUCE that uses Control Po
  - is able to get updates on a regular basis without having to update the entire JUCE codebase
 
 This custom LV2 wrapper is available at [github.com/Darkglass-Electronics/juce-anagram-lv2](https://github.com/Darkglass-Electronics/juce-anagram-lv2/).  
-There is a JUCE example using this wrapper plugin under [examples][examples/].
+There is a JUCE example using this wrapper plugin under [examples](examples/).
