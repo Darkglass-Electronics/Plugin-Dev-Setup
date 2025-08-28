@@ -23,8 +23,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/mod-workdir/download
-          key: bootstrap-linux-download-${{ matrix.container }}-v${{ env.CACHE_VERSION }}
+            ~/mod-workdir
+          key: bootstrap-linux-${{ matrix.container }}-v${{ env.CACHE_VERSION }}
       - name: Install dependencies
         run: |
           apt-get update -qq && apt-get install -yqq \
@@ -37,4 +37,4 @@ jobs:
       - name: Bootstrap toolchain
         run: |
           sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' ./mod-plugin-builder/toolchain/*.config
-          ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }}
+          ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }} && ./.clean-install.sh ${{ matrix.platform }}
