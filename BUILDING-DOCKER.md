@@ -78,9 +78,7 @@ Running it again is possible with `docker start -i "anagram-container-name"` (ad
 
 ### Step 3: Build your own project with the custom toolchain
 
-TODO
-
-##### Example using cmake
+#### Example using cmake
 
 ```sh
 # setup your project for building (-S specifies cmake project folder, -B specifies build output folder)
@@ -92,7 +90,7 @@ $(which cmake) --build build-anagram
 
 NOTE: The odd `$(which cmake)` above is required; the build environment uses `cmake` as an alias with a few extra args.
 
-##### Example using raw makefiles
+#### Example using raw makefiles
 
 Simply do:
 
@@ -100,10 +98,6 @@ Simply do:
 # build your project (-C specifies the project build folder)
 make -C /path/to/your/project
 ```
-
-##### Example using rust
-
-TODO
 
 ### Step 3: Deploy plugin
 

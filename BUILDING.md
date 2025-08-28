@@ -14,12 +14,8 @@ These tools only run properly under a Linux system, so if you are not using Linu
 
 ### Linux: Direct toolchain bootstrap
 
-NOTE: This is meant for Linux hosts only.
-
 See [BUILDING-LINUX.md](BUILDING-LINUX.md) for instructions on how to build when using Linux.
 
 ### Other OSes: Setup toolchain through docker
-
-NOTE: This is meant for non-Linux hosts, like macOS or Windows.
 
 See [BUILDING-DOCKER.md](BUILDING-DOCKER.md) for instructions on how to build when not using Linux, through the use of docker.
