@@ -1,0 +1,39 @@
+name: bootstrap-linux
+
+on: [push, pull_request]
+
+env:
+  CT_ALLOW_BUILD_AS_ROOT_SURE: 1
+  DEBIAN_FRONTEND: noninteractive
+  FORCE_UNSAFE_CONFIGURE: 1
+
+jobs:
+  anagram:
+    strategy:
+      matrix:
+        container: [debian:11, debian:12, debian:13, ubuntu:20.04, ubuntu:22.04, ubuntu:24.04]
+        platform: [darkglass-anagram, darkglass-anagram-debug]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/mod-workdir/download
+          key: bootstrap-linux-download-${{ matrix.container }}
+      - name: Install dependencies
+        run: |
+          apt-get update -qq && apt-get install -yqq \
+            install acl bc curl cvs git mercurial rsync subversion wget \
+            bison bzip2 flex gawk gperf gzip help2man nano perl patch tar texinfo unzip \
+            automake binutils build-essential cpio libtool libncurses-dev pkg-config python-is-python3 libtool-bin
+      - name: Clone mod-plugin-builder
+        run: |
+          git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
+      - name: Bootstrap toolchain
+        run: |
+          sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' ./mod-plugin-builder/toolchain/*.config
+          ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }}
