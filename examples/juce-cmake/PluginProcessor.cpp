@@ -45,6 +45,8 @@ void ExampleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 {
     const float gainCoef = juce::Decibels::decibelsToGain(gain->get());
     buffer.applyGain(gainCoef);
+
+    midiMessages.clear();
 }
 
 //==================================================================================

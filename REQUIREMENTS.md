@@ -18,9 +18,17 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 - Parameters MUST have smoothing when relevant (filters, gain, etc)
 
-- LV2 "enabled" designation MUST be implemented, for smooth bypass on/off
+- LV2 "enabled" designation MUST be implemented as a control port, for smooth bypass on/off
 
-- LV2 "reset" designation MUST be implemented for the plugins where it makes sense (like delays, so that changing presets clears old buffers)
+- LV2 "enabled" designated control port MUST have its default value as 1 for "on"
+
+- LV2 "reset" designation SHOULD be implemented as a control port for the plugins where it makes sense (like delays, so that changing presets clears old buffers)
 
 - Parameters SHOULD be grouped into sets of 6  
   Anagram "block settings" screen shows 6 parameters at a time in a paginated fashion
+
+## Parameter changes
+
+- Plugins MUST NOT change the "enabled"/"bypass" control on their own
+
+- Plugins SHOULD try to avoid changing parameters on their own, as it is likely to mess with Scenes

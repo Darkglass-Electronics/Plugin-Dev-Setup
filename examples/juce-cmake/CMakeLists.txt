@@ -71,6 +71,7 @@ target_compile_definitions(DarkglassExampleJUCE
         JUCE_USE_FLAC=0
         JUCE_USE_OGGVORBIS=0
         # disable other stuff
+        JUCE_USE_CURL=0
         JUCE_WEB_BROWSER=0
 )
 
