@@ -32,6 +32,8 @@ FetchContent_MakeAvailable(juce-anagram-lv2)
 
 # Fetch and import JUCE during build, as to not store it in this repository
 # You will likely want to have it locally as either a copy or git submodule and then use `add_subdirectory`
+# NOTE If you use a local copy make sure to patch your copy/fork for fixing cross-compilation, see:
+# https://github.com/Darkglass-Electronics/juce-anagram-lv2/tree/main/cross-compilation-patches
 include(FetchContent)
 FetchContent_Declare(JUCE
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
