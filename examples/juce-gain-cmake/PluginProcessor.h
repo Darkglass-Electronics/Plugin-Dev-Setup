@@ -4,22 +4,28 @@
 
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_dsp/juce_dsp.h>
+/* TODO
+ * - add bypass parameter
+ * - use parameter smoothing
+ * - bring back regular juce code for non-anagram builds
+ * - add "-Inf" enumerated value (is it possible with juce??)
+ */
 
-//==================================================================================
+#include <juce_audio_processors/juce_audio_processors.h>
+
+//=====================================================================================================================
 
 class ExampleAudioProcessor : public juce::AudioProcessor {
 public:
-    //==============================================================================
+    //=================================================================================================================
     ExampleAudioProcessor();
     ~ExampleAudioProcessor() override;
 
-    //==============================================================================
+    //=================================================================================================================
     /** Returns the name of this processor. */
     const juce::String getName() const override;
 
-    //==============================================================================
+    //=================================================================================================================
     /** Called before playback starts, to let the processor prepare itself.
 
         The sample rate is the target sample rate, and will remain constant until
@@ -113,7 +119,7 @@ public:
     void processBlock (juce::AudioBuffer<float>& buffer,
                        juce::MidiBuffer& midiMessages) override;
 
-    //==============================================================================
+    //=================================================================================================================
 
     /** Returns the length of the processor's tail, in seconds. */
     double getTailLengthSeconds() const override;
@@ -142,7 +148,7 @@ public:
     */
     bool isMidiEffect() const override;
 
-    //==============================================================================
+    //=================================================================================================================
     /** Creates the processor's GUI.
 
         This can return nullptr if you want a GUI-less processor, in which case the host
@@ -178,7 +184,7 @@ public:
     */
     bool hasEditor() const override;
 
-    //==============================================================================
+    //=================================================================================================================
     /** Returns the number of preset programs the processor supports.
 
         The value returned must be valid as soon as this object is created, and
@@ -200,7 +206,7 @@ public:
     /** Called by the host to rename a program. */
     void changeProgramName (int index, const juce::String& newName) override;
 
-    //==============================================================================
+    //=================================================================================================================
     /** The host will call this method when it wants to save the processor's internal state.
 
         This must copy any info about the processor's state into the block of memory provided,
@@ -239,10 +245,10 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
-    //==============================================================================
+    //=================================================================================================================
     juce::AudioParameterFloat* gain;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExampleAudioProcessor)
 };
 
-//==================================================================================
+//=====================================================================================================================

@@ -19,9 +19,6 @@ project(DarkglassExampleJUCE
     VERSION 0.0.1
 )
 
-# FIXME this should not be needed
-set(JUCE_ANAGRAM_LV2_DIR "${CMAKE_CURRENT_BINARY_DIR}/_deps/juce-anagram-lv2-src")
-
 # Import the custom Anagram LV2 Wrapper
 # You will likely want to have it locally as either a copy or git submodule and then use `add_subdirectory`
 include(FetchContent)
@@ -38,34 +35,34 @@ FetchContent_MakeAvailable(juce-anagram-lv2)
 include(FetchContent)
 FetchContent_Declare(JUCE
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG 8.0.8
+    GIT_TAG 8.0.9
     GIT_SHALLOW TRUE
-    PATCH_COMMAND patch -p1 -i "${JUCE_ANAGRAM_LV2_DIR}/cross-compilation-patches/v8.0.8.patch"
+    PATCH_COMMAND patch -p1 -i "${JUCE_ANAGRAM_LV2_DIR}/cross-compilation-patches/v8.0.9.patch"
     UPDATE_DISCONNECTED TRUE
 )
 FetchContent_MakeAvailable(JUCE)
 
 # Setup a JUCE plugin the usual way
-juce_add_plugin(DarkglassExampleJUCE
+juce_add_plugin(DarkglassExampleGainJUCE
     COMPANY_NAME "Darkglass Electronics Oy"
     COMPANY_WEBSITE "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup"
-    PRODUCT_NAME "Example"
-    BUNDLE_ID "com.darkglass.anagram-example-juce"
+    PRODUCT_NAME "Example Gain JUCE"
+    BUNDLE_ID "com.darkglass.anagram-example-gain-juce"
     COPY_PLUGIN_AFTER_BUILD FALSE
-    DESCRIPTION "Example plugin for Anagram using JUCE"
+    DESCRIPTION "Example gain plugin for Anagram using JUCE"
     FORMATS LV2
     IS_MIDI_EFFECT FALSE
     IS_SYNTH FALSE
-    LV2_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-juce"
+    LV2_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-gain-juce"
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
 )
 
 # Enable the custom Anagram LV2 wrapper
-juce_anagram_lv2_setup(DarkglassExampleJUCE)
+juce_anagram_lv2_setup(DarkglassExampleGainJUCE)
 
 # Set extra compile definitions to reduce features and thus our binary size too
-target_compile_definitions(DarkglassExampleJUCE
+target_compile_definitions(DarkglassExampleGainJUCE
     PUBLIC
         # disable audio codecs that we will never use
         JUCE_USE_FLAC=0
@@ -76,14 +73,14 @@ target_compile_definitions(DarkglassExampleJUCE
 )
 
 # Use JUCE recommended flags
-target_link_libraries(DarkglassExampleJUCE
+target_link_libraries(DarkglassExampleGainJUCE
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
 )
 
-target_sources(DarkglassExampleJUCE
+target_sources(DarkglassExampleGainJUCE
     PRIVATE
         PluginProcessor.cpp
 )
