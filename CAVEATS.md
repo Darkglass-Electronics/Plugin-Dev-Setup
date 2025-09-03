@@ -14,8 +14,8 @@ The only supported use of LV2 Parameters right now is in regards of loading of f
 ### No display server
 
 While the system has a screen with custom graphics, there is no display server like X11 or Wayland inside the OS.  
-There are no OpenGL, X11 or Wayland related libraries in the OS.  
-If your plugin binary links against libX11.so for example, it will simply fail to load.
+There are no OpenGL, Vulkan, X11 or Wayland related libraries in the OS.  
+If your plugin binary links against `libX11.so` for example, it will simply fail to load.
 
 ### No GPU
 
@@ -28,7 +28,7 @@ We set up LVGL to use 4 rendering threads, matching the 4 "little" cores present
 
 Some plugin formats like CLAP and VST make use of parameter "text", rendered by the plugin each time the host needs a string representation of an arbitrary value.  
 This allows plugins to define their parameters in a normalized 0.0 <-> 1.0 range, which is fully opaque to the host.  
-In such cases the host needs to ask the plugin how an arbitrary parameter value is supposed to be represented/shown in "text" form.
+In such cases the host needs to ask the plugin how an arbitrary parameter value is supposed to be represented/shown in "text" form and vice-versa.
 
 Due to the architecture used inside Anagram - the UI/DSP separation - this setup of asking the plugin what is the text representation of a parameter value is not supported.  
 The UI side intentionally does not have access to the plugin object.

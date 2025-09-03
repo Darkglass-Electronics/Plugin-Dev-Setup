@@ -1,4 +1,4 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Documentation for Darkglass Anagram
 
 This document contains information on how to build your audio plugins for the [Darkglass Anagram](https://www.darkglass.com/products/anagram/),
 specifically for non-Linux hosts like macOS or Windows, through the use of docker.
@@ -9,8 +9,12 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 ### Step 0: Install docker
 
-TODO
-either docker desktop or alternative (must be compatible with `docker buildx` command)
+Before we start building we need to install [docker](https://www.docker.com/), as the cross-compilation steps are meant to be used under a Linux host, and docker is a nice and common way to achive that.
+You can either install [Docker Desktop](https://www.docker.com/products/docker-desktop/) or any alternative of your choice, the only requirement is being compatible with the `docker buildx` command.
+
+How you install docker is outside the scope of this document, the next step assumes you have it installed and working already.
+
+If you really do not want to install docker, you can pick any recent Debian-based Linux distribution of your choice and install it on a Virtual Machine. Then follow the [BUILDING-LINUX.md](BUILDING-LINUX.md) instructions inside the Virtual Machine.
 
 ### Step 1: Build the docker image
 
@@ -30,8 +34,8 @@ docker buildx build \
 The debug argument is optional, default is false but can be set to true if needed.
 We recommend to name the image with a debug suffix (e.g. `--tag "darkglass-anagram-debug"`) to easily differentiate between release and debug builds.
 
-The target argument is also optional, has the possible choices:
- - full (builds everything, toolchain and all libs)
+The target argument is also optional, has these possible choices:
+ - full (builds everything: toolchain and all libs)
  - minimal (builds minimal libs only, includes host-cmake, fftw and liblo)
  - kernel (builds libs needed for the Linux kernel)
  - toolchain (builds toolchain only, no extra libs or host tools)
@@ -88,7 +92,7 @@ cmake -S /path/to/your/project -B build-anagram
 $(which cmake) --build build-anagram
 ```
 
-NOTE: The odd `$(which cmake)` above is required; the build environment uses `cmake` as an alias with a few extra args.
+NOTE: The odd `$(which cmake)` above is required; the build environment uses `cmake` as an alias with a few extra args, which would override `--build`.
 
 #### Example using raw makefiles
 
@@ -107,9 +111,9 @@ Assuming you have an Anagram unit running in Developer Mode, you can just do:
 # cd to where your lv2 bundles are located
 cd /path/to/your/build/output/dir
 
-# copy over lv2 bundles
+# copy over lv2 bundles into Anagram
 scp -O -r *.lv2 root@192.168.51.1:/root/.lv2/
 
-# restart system services that use plugins
-systemctl restart jack2 lvgl-app
+# restart Anagram system services that use plugins
+ssh root@192.168.51.1 "systemctl restart jack2 lvgl-app"
 ```

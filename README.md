@@ -17,10 +17,10 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to b
 ## Under the hood
 
 Developing for Anagram means developing for a Linux-embed ARMv8.2 64-bit multi-core system, with 4 "little" CPU cores dedicated to system and graphics and 2 "big" CPU cores dedicated to audio.  
-Inside there is a Linux 6.1 PREEMPT_RT kernel with glibc 2.34.
+Inside there is a Linux 6.1 PREEMPT_RT kernel with (g)libc 2.34.
 
 For audio [JACK2](https://jackaudio.org/) runs as the audio server, with [mod-host](https://github.com/mod-audio/mod-host/) on top taking care of plugin loading and management.  
-On top we have our custom UI based on [LVGL](https://lvgl.io/), running on a separate process from the audio server and plugin host.
+Then on top we have our custom UI based on [LVGL](https://lvgl.io/), running on a separate process from the audio server and plugin host.
 
 The only supported plugin format at the moment is [LV2](https://lv2plug.in/).  
 We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions](https://github.com/Darkglass-Electronics/LV2-Extensions/).
@@ -28,13 +28,13 @@ We have a few LV2 Extensions at [github.com/Darkglass-Electronics/LV2-Extensions
 ## JUCE
 
 A special note needs to be given about JUCE.  
-While it does support exporting LV2 plugins, it uses "Patch Parameters" which is not supported in Anagram at the moment.
+While it does officially support exporting LV2 plugins since version 7, the official implementation uses "Patch Parameters" which is not supported in Anagram at the moment.
 
-We have developed a custom alternative LV2 wrapper for JUCE that uses Control Ports plus:
+We have developed a custom, alternative LV2 wrapper for JUCE that uses old-style Control Ports plus:
 
- - disables regular X11 UI (we do not use it)
- - only enables the specific features in use by the plugin (e.g. Atom port for time events)
- - has custom Anagram-specific parameter hints
+ - disables regular desktop UI (we do not use it)
+ - only enables the specific features in use by the plugin (e.g. Atom port only enabled if plugin needs time events)
+ - has custom Anagram-specific plugin and parameter meta-data
  - is able to get updates on a regular basis without having to update the entire JUCE codebase
 
 This custom LV2 wrapper is available at [github.com/Darkglass-Electronics/juce-anagram-lv2](https://github.com/Darkglass-Electronics/juce-anagram-lv2/).  

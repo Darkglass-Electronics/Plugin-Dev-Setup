@@ -1,4 +1,4 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Documentation for Darkglass Anagram
 
 This document contains information on how to build your audio plugins for the [Darkglass Anagram](https://www.darkglass.com/products/anagram/),
 specifically for Linux hosts.
@@ -8,8 +8,6 @@ See [BUILDING-DOCKER.md](BUILDING-DOCKER.md) for instructions on how to build wh
 NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
 
 ### Step 1: Direct toolchain bootstrap
-
-NOTE: This step is meant for Linux hosts, for macOS and Windows see step 1a above.
 
 Simply clone the [mod-plugin-builder](https://github.com/mod-audio/mod-plugin-builder/) git repository, install its dependencies and run the bootstrap script targetting Anagram. Like so:
 
@@ -26,7 +24,7 @@ automake binutils build-essential cpio libtool libncurses-dev pkg-config python-
 ./mod-plugin-builder/bootstrap.sh darkglass-anagram
 ```
 
-This will take approximately 1 hour in total, and require around 15Gb of disk space.
+This will take approximately 1 hour in total, and require around 5Gb of disk space.
 
 ### Step 2: Build your own project with the custom toolchain
 
@@ -44,7 +42,7 @@ cmake -S /path/to/your/project -B build-anagram
 $(which cmake) --build build-anagram
 ```
 
-NOTE: The odd `$(which cmake)` is used here because after "sourcing" the `local.env` file, cmake becomes an alias that sets up a few extra cmake args.
+NOTE: The odd `$(which cmake)` is used here because after "sourcing" the `local.env` file, cmake becomes an alias that sets up a few extra cmake args, which would override `--build`.
 
 ### Step 3: Deploy plugin
 
@@ -54,9 +52,9 @@ Assuming you have an Anagram unit running in Developer Mode, you can just do:
 # cd to where your lv2 bundles are located
 cd /path/to/your/build/output/dir
 
-# copy over lv2 bundles
+# copy over lv2 bundles into Anagram
 scp -O -r *.lv2 root@192.168.51.1:/root/.lv2/
 
-# restart system services that use plugins
-systemctl restart jack2 lvgl-app
+# restart Anagram system services that use plugins
+ssh root@192.168.51.1 "systemctl restart jack2 lvgl-app"
 ```

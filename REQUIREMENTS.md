@@ -1,4 +1,4 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Documentation for Darkglass Anagram
 
 This document contains information on how plugins should behave when on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 A basic set of rules to follow in order to ensure consistency within the platform.
@@ -7,7 +7,7 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 ## IO
 
-- Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo).  
+- Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo) or 1in-2out.  
   Anagram will automatically load 2 instances of mono plugins if there are stereo outputs in preceding signal chain.
 
 - Plugins CAN have both mono and stereo variants exposed IFF the stereo version sounds different than dual-mono.  
@@ -28,6 +28,8 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
   Anagram "block settings" screen shows 6 parameters at a time in a paginated fashion
 
 ## Parameter changes
+
+- Plugins MUST NOT change global CPU registers (like "flush to zero"), the host already has them set
 
 - Plugins MUST NOT change the "enabled"/"bypass" control on their own
 

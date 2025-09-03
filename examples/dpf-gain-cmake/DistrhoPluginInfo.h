@@ -1,7 +1,6 @@
 /*
  * Example plugin for Anagram using DPF
- * Copyright (C) 2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
- * Copyright (C) 2021-2022 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2025 Filipe Coelho <falktx@falktx.com>
  * SPDX-License-Identifier: ISC
  */
 
@@ -10,25 +9,25 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "DarkglassExampleDPF"
+#define DISTRHO_PLUGIN_NAME "Example Gain DPF"
 
 /**
    Number of audio inputs the plugin has.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NUM_INPUTS 2
+#define DISTRHO_PLUGIN_NUM_INPUTS 1
 
 /**
    Number of audio outputs the plugin has.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NUM_OUTPUTS 2
+#define DISTRHO_PLUGIN_NUM_OUTPUTS 1
 
 /**
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-dpf"
+#define DISTRHO_PLUGIN_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-gain-dpf"
 
 /**
    Whether the plugin has a custom %UI.
@@ -134,7 +133,7 @@
    It must be unique within at least a set of plugins from the brand.
    @note This macro is required when building AU plugins
  */
-#define DISTRHO_PLUGIN_UNIQUE_ID exam
+#define DISTRHO_PLUGIN_UNIQUE_ID exGa
 
 /**
    Custom LV2 category for the plugin.@n
@@ -181,7 +180,7 @@
 
    See http://lv2plug.in/ns/lv2core for more information.
  */
-#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:AmplifierPlugin"
+#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:UtilityPlugin"
 
 /**
    Custom VST3 categories for the plugin.@n
@@ -289,4 +288,4 @@
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
-#define DISTRHO_PLUGIN_CLAP_ID "com.darkglass.anagram-example-dpf"
+#define DISTRHO_PLUGIN_CLAP_ID "com.darkglass.anagram-example-gain-dpf"

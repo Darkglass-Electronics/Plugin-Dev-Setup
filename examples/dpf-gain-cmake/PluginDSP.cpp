@@ -1,7 +1,6 @@
 /*
  * Example plugin for Anagram using DPF
- * Copyright (C) 2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
- * Copyright (C) 2021-2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2025 Filipe Coelho <falktx@falktx.com>
  * SPDX-License-Identifier: ISC
  */
 
@@ -11,22 +10,28 @@
 START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
+// dB to coefficient, using -40 as mute point
 
 static constexpr const float db2coef(float g)
 {
-    return g > -90.f ? std::pow(10.f, g * 0.05f) : 0.f;
+    return g > -40.f ? std::pow(10.f, g * 0.05f) : 0.f;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 class ExamplePlugin : public Plugin
 {
+    // list of parameters
     enum Parameters {
-        kParamGain = 0,
+        kParamBypass,
+        kParamGainDB,
         kParamCount
     };
 
-    float fGainDB = 0.f;
+    // store raw parameter values, so we can return them during getParameterValue()
+    float fParameters[kParamCount] = {};
+
+    // gain coefficient with smoothing
     ExponentialValueSmoother fSmoothGain;
 
 public:
@@ -37,9 +42,10 @@ public:
     ExamplePlugin()
         : Plugin(kParamCount, 0, 0) // parameters, programs, states
     {
+        constexpr float timeMs = 0.02f;
         fSmoothGain.setSampleRate(getSampleRate());
         fSmoothGain.setTargetValue(db2coef(0.f));
-        fSmoothGain.setTimeConstant(0.02f); // 20ms
+        fSmoothGain.setTimeConstant(timeMs);
     }
 
 protected:
@@ -52,7 +58,7 @@ protected:
     */
     const char* getLabel() const noexcept override
     {
-        return "DarkglassExampleDPF";
+        return "DarkglassExampleGainDPF";
     }
 
    /**
@@ -61,7 +67,7 @@ protected:
     */
     const char* getDescription() const override
     {
-        return "Example plugin for Anagram using DPF";
+        return "Example gain plugin for Anagram using DPF";
     }
 
    /**
@@ -69,7 +75,7 @@ protected:
     */
     const char* getMaker() const noexcept override
     {
-        return "falkTX, Jean Pierre Cimalando";
+        return "falkTX";
     }
 
    /**
@@ -99,16 +105,29 @@ protected:
     */
     void initParameter(uint32_t index, Parameter& parameter) override
     {
-        DISTRHO_SAFE_ASSERT_RETURN(index == 0,);
-
-        parameter.ranges.min = -90.f;
-        parameter.ranges.max = 30.f;
-        parameter.ranges.def = 0.f;
-        parameter.hints = kParameterIsAutomatable;
-        parameter.name = "Gain";
-        parameter.shortName = "Gain";
-        parameter.symbol = "gain";
-        parameter.unit = "dB";
+        switch (static_cast<Parameters>(index))
+        {
+        case kParamBypass:
+            parameter.initDesignation(kParameterDesignationBypass);
+            break;
+        case kParamGainDB:
+            parameter.ranges.min = -40.f;
+            parameter.ranges.max = 20.f;
+            parameter.ranges.def = 0.f;
+            parameter.hints = kParameterIsAutomatable;
+            parameter.name = "Gain";
+            parameter.symbol = "gain";
+            parameter.unit = "dB";
+            {
+                parameter.enumValues.count = 1;
+                parameter.enumValues.values = new ParameterEnumerationValue[1];
+                parameter.enumValues.values[0].label = "-Inf";
+                parameter.enumValues.values[0].value = -40.f;
+            }
+            break;
+        case kParamCount:
+            break;
+        }
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -120,9 +139,7 @@ protected:
     */
     float getParameterValue(uint32_t index) const override
     {
-        DISTRHO_SAFE_ASSERT_RETURN(index == 0, 0.f);
-
-        return fGainDB;
+        return fParameters[index];
     }
 
    /**
@@ -133,10 +150,22 @@ protected:
     */
     void setParameterValue(uint32_t index, float value) override
     {
-        DISTRHO_SAFE_ASSERT_RETURN(index == 0,);
+        fParameters[index] = value;
 
-        fGainDB = value;
-        fSmoothGain.setTargetValue(db2coef(std::clamp(value, -90.f, 30.f)));
+        switch (static_cast<Parameters>(index))
+        {
+        // reuse bypass and gain parameter handling for this simple example
+        // if bypassed, set smooth gain to 0dB
+        // if enabled, set smooth gain as the coefficient from dB
+        case kParamBypass:
+        case kParamGainDB:
+            fSmoothGain.setTargetValue(fParameters[kParamBypass] > 0.5f
+                ? db2coef(0.f)
+                : db2coef(std::clamp(fParameters[kParamGainDB], -40.f, 20.f)));
+            break;
+        case kParamCount:
+            break;
+        }
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -156,21 +185,15 @@ protected:
     */
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        // get the left and right audio inputs
-        const float* const inpL = inputs[0];
-        const float* const inpR = inputs[1];
+        // get the mono audio input
+        const float* const in = inputs[0];
 
-        // get the left and right audio outputs
-        float* const outL = outputs[0];
-        float* const outR = outputs[1];
+        // get the mono audio output
+        float* const out = outputs[0];
 
-        // apply gain against all samples
+        // apply gain
         for (uint32_t i = 0; i < frames; ++i)
-        {
-            const float gain = fSmoothGain.next();
-            outL[i] = inpL[i] * gain;
-            outR[i] = inpR[i] * gain;
-        }
+            out[i] = in[i] * fSmoothGain.next();
     }
 
     // ----------------------------------------------------------------------------------------------------------------

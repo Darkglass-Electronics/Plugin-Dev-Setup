@@ -14,7 +14,7 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 # Setup project languages and version
-project(DarkglassExampleDPF
+project(DarkglassExampleGainDPF
     LANGUAGES C CXX
     VERSION 0.0.1
 )
@@ -31,14 +31,14 @@ FetchContent_Declare(DPF
 FetchContent_MakeAvailable(DPF)
 
 # Setup a DPF plugin the usual way
-dpf_add_plugin(DarkglassExampleDPF
+dpf_add_plugin(DarkglassExampleGainDPF
     TARGETS lv2
     FILES_DSP
         PluginDSP.cpp
 )
 
 # Set include directories
-target_include_directories(DarkglassExampleDPF
+target_include_directories(DarkglassExampleGainDPF
     PUBLIC
         .
 )

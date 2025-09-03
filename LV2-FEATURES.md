@@ -1,4 +1,4 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Documentation for Darkglass Anagram
 
 This document contains information on what LV2 host features are implemented on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 Most of official extensions are implemented, with a few custom ones on top as well.

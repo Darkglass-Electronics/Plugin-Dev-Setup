@@ -1,4 +1,4 @@
-# Audio Plugin Development Documentation for Darkglass Anagram
+# Audio Plugin Documentation for Darkglass Anagram
 
 This document contains information on how to build your audio plugins for the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).
 
