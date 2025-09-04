@@ -20,7 +20,7 @@ cmake -S . -B build
 $(which cmake) --build build
 
 # copy over lv2 bundles into Anagram
-scp -O -r *.lv2 root@192.168.51.1:/root/.lv2/
+scp -O -r build/*_artefacts/*/LV2/*.lv2 root@192.168.51.1:/root/.lv2/
 
 # restart Anagram system services that use plugins
 ssh root@192.168.51.1 "systemctl restart jack2 lvgl-app"

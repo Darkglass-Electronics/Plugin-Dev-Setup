@@ -61,7 +61,9 @@ juce_add_plugin(DarkglassExampleGainJUCE
 )
 
 # Enable the custom Anagram LV2 wrapper
-juce_anagram_lv2_setup(DarkglassExampleGainJUCE)
+juce_anagram_lv2_setup(DarkglassExampleGainJUCE
+    CATEGORY "lv2:UtilityPlugin"
+)
 
 # Set extra compile definitions to reduce features and thus our binary size too
 target_compile_definitions(DarkglassExampleGainJUCE
