@@ -10,11 +10,17 @@
 START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
-// dB to coefficient, using -40 as mute point
+// global definitions for this example plugin
+
+static constexpr float minGainDB = -40.f;
+static constexpr float maxGainDB = 20.f;
+
+// --------------------------------------------------------------------------------------------------------------------
+// dB to coefficient
 
 static constexpr const float db2coef(float g)
 {
-    return g > -40.f ? std::pow(10.f, g * 0.05f) : 0.f;
+    return g > minGainDB ? std::pow(10.f, g * 0.05f) : 0.f;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -25,6 +31,7 @@ class ExamplePlugin : public Plugin
     enum Parameters {
         kParamBypass,
         kParamGainDB,
+        kParamInvertPolarity,
         kParamCount
     };
 
@@ -111,8 +118,8 @@ protected:
             parameter.initDesignation(kParameterDesignationBypass);
             break;
         case kParamGainDB:
-            parameter.ranges.min = -40.f;
-            parameter.ranges.max = 20.f;
+            parameter.ranges.min = minGainDB;
+            parameter.ranges.max = maxGainDB;
             parameter.ranges.def = 0.f;
             parameter.hints = kParameterIsAutomatable;
             parameter.name = "Gain";
@@ -122,8 +129,16 @@ protected:
                 parameter.enumValues.count = 1;
                 parameter.enumValues.values = new ParameterEnumerationValue[1];
                 parameter.enumValues.values[0].label = "-Inf";
-                parameter.enumValues.values[0].value = -40.f;
+                parameter.enumValues.values[0].value = minGainDB;
             }
+            break;
+        case kParamInvertPolarity:
+            parameter.ranges.min = 0.f;
+            parameter.ranges.max = 1.f;
+            parameter.ranges.def = 0.f;
+            parameter.hints = kParameterIsAutomatable | kParameterIsInteger | kParameterIsBoolean;
+            parameter.name = "Invert Polarity";
+            parameter.symbol = "inv_polarity";
             break;
         case kParamCount:
             break;
@@ -152,7 +167,7 @@ protected:
     {
         fParameters[index] = value;
 
-        switch (static_cast<Parameters>(index))
+        switch (index)
         {
         // reuse bypass and gain parameter handling for this simple example
         // if bypassed, set smooth gain to 0dB
@@ -161,9 +176,7 @@ protected:
         case kParamGainDB:
             fSmoothGain.setTargetValue(fParameters[kParamBypass] > 0.5f
                 ? db2coef(0.f)
-                : db2coef(std::clamp(fParameters[kParamGainDB], -40.f, 20.f)));
-            break;
-        case kParamCount:
+                : db2coef(std::clamp(fParameters[kParamGainDB], minGainDB, maxGainDB)));
             break;
         }
     }
@@ -191,9 +204,12 @@ protected:
         // get the mono audio output
         float* const out = outputs[0];
 
-        // apply gain
+        // polarity
+        const float polarity = fParameters[kParamInvertPolarity] > 0.5f ? -1.f : 1.f;
+
+        // apply gain and polarity
         for (uint32_t i = 0; i < frames; ++i)
-            out[i] = in[i] * fSmoothGain.next();
+            out[i] = in[i] * fSmoothGain.next() * polarity;
     }
 
     // ----------------------------------------------------------------------------------------------------------------

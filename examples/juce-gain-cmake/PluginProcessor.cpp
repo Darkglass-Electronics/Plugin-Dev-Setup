@@ -26,7 +26,7 @@ class ExampleBypassParameter : public juce::AudioParameterBool
 {
 public:
     ExampleBypassParameter(juce::AudioParameterFloat*& gainRef, juce::SmoothedValue<float>& gainValueRef)
-        : juce::AudioParameterBool ("bypass", "Bypass", false),
+        : juce::AudioParameterBool ({ "bypass", 1 }, "Bypass", false),
           gain(gainRef),
           gainValue(gainValueRef)
     {}
@@ -48,7 +48,7 @@ class ExampleGainParameter : public juce::AudioParameterFloat,
 {
 public:
     ExampleGainParameter(juce::AudioParameterBool*& bypassRef, juce::SmoothedValue<float>& gainValueRef)
-        : juce::AudioParameterFloat ({ "gain", 1 },
+        : juce::AudioParameterFloat ({ "gain", 2 },
                                      "Gain",
                                      { minGainDB, maxGainDB },
                                      0.f,
@@ -81,6 +81,9 @@ class ExampleAudioProcessor : public juce::AudioProcessor
     // JUCE parameters
     juce::AudioParameterBool* bypass = new ExampleBypassParameter (gain, gainValue);
     juce::AudioParameterFloat* gain = new ExampleGainParameter (bypass, gainValue);
+    juce::AudioParameterBool* invertPolarity = new juce::AudioParameterBool({ "inv-polarity", 3 },
+                                                                            "Invert Polarity",
+                                                                            false);
 
     // Gain coefficient as a smooth value, directly referenced by both bypass and gain parameters
     juce::SmoothedValue<float> gainValue;
@@ -93,6 +96,7 @@ public:
     {
         addParameter (bypass);
         addParameter (gain);
+        addParameter (invertPolarity);
 
         gainValue.setCurrentAndTargetValue (1.f);
     }
@@ -137,6 +141,9 @@ public:
     void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override
     {
         gainValue.applyGain(buffer.getWritePointer(0), buffer.getNumSamples());
+
+        if (invertPolarity->get())
+            buffer.applyGain(-1.f);
 
         juce::ignoreUnused (midiMessages);
     }
