@@ -42,10 +42,10 @@ public:
     ExamplePlugin()
         : Plugin(kParamCount, 0, 0) // parameters, programs, states
     {
-        constexpr float timeMs = 0.02f;
+        constexpr float smoothTimeMs = 0.02f;
         fSmoothGain.setSampleRate(getSampleRate());
         fSmoothGain.setTargetValue(db2coef(0.f));
-        fSmoothGain.setTimeConstant(timeMs);
+        fSmoothGain.setTimeConstant(smoothTimeMs);
     }
 
 protected:
