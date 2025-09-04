@@ -10,7 +10,7 @@
 START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
-// global definitions for this example plugin
+// definitions for this example plugin, matching the Darkglass Gain plugin
 
 static constexpr float minGainDB = -40.f;
 static constexpr float maxGainDB = 20.f;
