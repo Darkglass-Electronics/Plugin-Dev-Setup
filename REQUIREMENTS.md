@@ -5,6 +5,19 @@ A basic set of rules to follow in order to ensure consistency within the platfor
 
 NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
 
+## Plugin meta-data
+
+- Each Plugin MUST have a [dg:abbreviation](http://www.darkglass.com/lv2/ns#abbreviation) - a simple string consisting of 2 or 3 characters in uppercase.  
+  This is used when referring to a plugin + parameter name in the bindings screen.  
+  The abbreviation does not have to be globally unique.  
+  Example:
+```ttl
+<urn:darkglass:example>
+  a lv2:Plugin, doap:Project ;
+  doap:name "Gain" ;
+  <http://www.darkglass.com/lv2/ns#abbreviation> "GAI" ;
+```
+
 ## IO
 
 - Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo) or 1in-2out.  
