@@ -12,10 +12,24 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
   The abbreviation does not have to be globally unique.  
   Example:
 ```ttl
+@prefix dg: <http://www.darkglass.com/lv2/ns#> .
 <urn:darkglass:example>
   a lv2:Plugin, doap:Project ;
   doap:name "Gain" ;
-  <http://www.darkglass.com/lv2/ns#abbreviation> "GAI" ;
+  dg:abbreviation "GAI" ;
+```
+
+- Each Plugin MUST have [dg:blockImageOff](http://www.darkglass.com/lv2/ns#blockImageOff) and [dg:blockImageOn](http://www.darkglass.com/lv2/ns#blockImageOn) - 2 paths for 200x200 PNG image files stored inside the LV2 plugin bundle.  
+  These images are shown on the signal chain screen and others as the plugin "block" image.  
+  Typically the "off" image is darkened compared to the "on" image.  
+  Example:
+```ttl
+@prefix dg: <http://www.darkglass.com/lv2/ns#> .
+<urn:darkglass:example>
+  a lv2:Plugin, doap:Project ;
+  doap:name "Gain" ;
+  dg:blockImageOff <gain-off.png> ;
+  dg:blockImageOn <gain-on.png> ;
 ```
 
 ## IO
@@ -31,11 +45,11 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 - Parameters MUST have smoothing when relevant (filters, gain, etc)
 
-- LV2 "enabled" designation MUST be implemented as a control port, for smooth bypass on/off
+- [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled) designation MUST be implemented as an [lv2:ControlPort](http://lv2plug.in/ns/lv2core#ControlPort), for smooth bypass on/off
 
-- LV2 "enabled" designated control port MUST have its default value as 1 for "on"
+- [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled) designated control port MUST have its default value as 1 for "on"
 
-- LV2 "reset" designation SHOULD be implemented as a control port for the plugins where it makes sense (like delays, so that changing presets clears old buffers)
+- [kx:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset) designation SHOULD be implemented as a control port for the plugins where it makes sense (like delays, so that changing presets clears old buffers)
 
 - Parameters SHOULD be grouped into sets of 6  
   Anagram "block settings" screen shows 6 parameters at a time in a paginated fashion
