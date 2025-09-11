@@ -13,6 +13,8 @@ TODO items
 
 ## Building and deploy
 
+Note: this step assumes you either are using the docker shell or have imported the build environment through "local.env".
+
 ```sh
 # change to this directory
 cd /path/to/dpf-gain-cmake/

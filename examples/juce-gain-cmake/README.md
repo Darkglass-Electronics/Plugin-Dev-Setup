@@ -34,12 +34,12 @@ juce_anagram_lv2_setup(DarkglassExampleGainJUCE
 
 ### Create block images
 
-Anagram uses 200x200 PNG image files for the "block" image of each plugin.
+Anagram uses 200x200 PNG image files for the "block" image of each plugin.  
 This is specified by the `BLOCK_IMAGE_OFF` and `BLOCK_IMAGE_ON` CMake properties.
 
 ### Set category
 
-Stock JUCE does not have a way to set the LV2 category, so we implement our own way here.
+Stock JUCE does not have a way to set the LV2 category, so we implement our own way here.  
 This is specified by the `CATEGORY` CMake property.
 
 Note that Anagram does not use stock LV2 categories,
@@ -47,6 +47,8 @@ see [CATEGORIES.md](https://github.com/Darkglass-Electronics/Plugin-Dev-Setup/bl
 for the LV2 -> Anagram category conversion.
 
 ## Building and deploy
+
+Note: this step assumes you either are using the docker shell or have imported the build environment through "local.env".
 
 ```sh
 # change to this directory
