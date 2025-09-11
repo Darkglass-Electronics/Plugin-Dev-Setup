@@ -11,6 +11,18 @@ It is the most simple possible plugin created with JUCE that meets Anagram requi
 
 ## Changes compared to stock JUCE plugins
 
+### Provide name abbreviation
+
+One on the names returned by `getAlternateDisplayNames` MUST contain only 2 or 3 characters in uppercase.
+See [REQUIREMENTS.md](https://github.com/Darkglass-Electronics/Plugin-Dev-Setup/blob/main/REQUIREMENTS.md)
+
+```C++
+juce::StringArray getAlternateDisplayNames() const override
+{
+    return { "GAI" };
+}
+```
+
 ### Use Anagram-specific LV2 wrapper
 
 In the `CMakeLists.txt` file you will need to import [juce-anagram-lv2](https://github.com/Darkglass-Electronics/juce-anagram-lv2.git)

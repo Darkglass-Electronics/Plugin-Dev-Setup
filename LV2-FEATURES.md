@@ -145,7 +145,7 @@ lv2:port [
 ```
 -->
 
-#### [kxprops:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset)
+#### [kx:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset)
 
 Trigger for clearing old buffers when changing presets
 
@@ -154,16 +154,16 @@ Special rules:
  - Must have default and minimum 0
 
 ```ttl
-@prefix lv2:     <http://lv2plug.in/ns/lv2core#> .
-@prefix pprops:  <http://lv2plug.in/ns/ext/port-props#> .
-@prefix kxprops: <http://kxstudio.sf.net/ns/lv2ext/props#> .
+@prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix kx:     <http://kxstudio.sf.net/ns/lv2ext/props#> .
 # ...
 lv2:port [
   a lv2:InputPort, lv2:ControlPort ;
   lv2:index 3 ;
   lv2:symbol "reset" ;
   lv2:name "Reset" ;
-  lv2:designation kxprops:Reset ;
+  lv2:designation kx:Reset ;
   lv2:portProperty lv2:integer , pprops:trigger ;
   lv2:default 0 ;
   lv2:minimum 0 ;
