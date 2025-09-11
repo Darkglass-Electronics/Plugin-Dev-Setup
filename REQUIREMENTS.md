@@ -20,14 +20,12 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 ```
 
 - Each Plugin MUST have [dg:blockImageOff](http://www.darkglass.com/lv2/ns#blockImageOff) and [dg:blockImageOn](http://www.darkglass.com/lv2/ns#blockImageOn) - 2 paths for 200x200 PNG image files stored inside the LV2 plugin bundle.  
-  These images are shown on the signal chain screen and others as the plugin "block" image.  
+  These images are shown on the signal chain and other screens and as the plugin "block" image.  
   Typically the "off" image is darkened compared to the "on" image.  
   Example:
 ```ttl
 @prefix dg: <http://www.darkglass.com/lv2/ns#> .
 <urn:darkglass:example>
-  a lv2:Plugin, doap:Project ;
-  doap:name "Gain" ;
   dg:blockImageOff <gain-off.png> ;
   dg:blockImageOn <gain-on.png> ;
 ```

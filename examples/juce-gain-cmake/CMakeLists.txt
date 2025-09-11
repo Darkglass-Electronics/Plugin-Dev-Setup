@@ -61,8 +61,11 @@ juce_add_plugin(DarkglassExampleGainJUCE
 )
 
 # Enable the custom Anagram LV2 wrapper
+# For more options see https://github.com/Darkglass-Electronics/juce-anagram-lv2/blob/main/CMakeLists.txt
 juce_anagram_lv2_setup(DarkglassExampleGainJUCE
     CATEGORY "lv2:UtilityPlugin"
+    BLOCK_IMAGE_OFF "images/block-off.png"
+    BLOCK_IMAGE_ON "images/block-on.png"
 )
 
 # Set extra compile definitions to reduce features and thus our binary size too

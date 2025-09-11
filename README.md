@@ -8,6 +8,8 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
 
+See [CATEGORIES.md](CATEGORIES.md) for the list of plugin categories used in Anagram and how it translates from LV2 ones.
+
 See [CAVEATS.md](CAVEATS.md) for a few caveats to be aware of when developing plugins for Anagram.
 
 See [LV2-FEATURES.md](LV2-FEATURES.md) for the list of LV2 features supported by Anagram.

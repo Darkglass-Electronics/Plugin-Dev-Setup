@@ -7,6 +7,10 @@ It is the most simple possible plugin created with DPF that meets Anagram requir
  - has parameter smoothing
  - uses mono IO (a dual-mono version would produce the same sound)
 
+TODO items
+ - contains name abbreviation
+ - contains block images
+
 ## Building and deploy
 
 ```sh
