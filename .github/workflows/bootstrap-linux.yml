@@ -9,7 +9,7 @@ env:
   FORCE_UNSAFE_CONFIGURE: 1
 
 jobs:
-  debian:
+  bootstrap:
     strategy:
       matrix:
         container: [debian:11, debian:12, debian:13, ubuntu:20.04, ubuntu:22.04, ubuntu:24.04]
@@ -38,3 +38,13 @@ jobs:
         run: |
           sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config
           ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }} && ./mod-plugin-builder/.clean-install.sh ${{ matrix.platform }}
+      - name: Set ARTIFACT_FILENAME
+        run: |
+          echo "ARTIFACT_FILENAME=$(echo bootstrap-linux-${{ matrix.container }}-${{ matrix.platform }} | sed 's/-darkglass-anagram//' | sed 's/:/-/g')" >> "${GITHUB_ENV}"
+      - name: Pack bootstrap
+        run: |
+          tar -C ~/mod-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_FILENAME }}
+          path: ${{ env.ARTIFACT_FILENAME }}.tar.gz
