@@ -43,8 +43,50 @@ jobs:
           echo "ARTIFACT_FILENAME=$(echo bootstrap-linux-${{ matrix.container }}-${{ matrix.platform }} | sed 's/-darkglass-anagram//' | sed 's/:/-/g')" >> "${GITHUB_ENV}"
       - name: Pack bootstrap
         run: |
-          tar -C ~/mod-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}
+          tar -C ~/mod-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}/host ${{ matrix.platform }}/target generic-aarch64/toolchain
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_FILENAME }}
           path: ${{ env.ARTIFACT_FILENAME }}.tar.gz
+
+  examples:
+    needs: bootstrap
+    strategy:
+      matrix:
+        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
+        platform: [darkglass-anagram, darkglass-anagram-debug]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set ARTIFACT_FILENAME
+        run: |
+          echo "ARTIFACT_FILENAME=$(echo bootstrap-linux-${{ matrix.container }}-${{ matrix.platform }} | sed 's/-darkglass-anagram//' | sed 's/:/-/g')" >> "${GITHUB_ENV}"
+      - name: Download bootstrap
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_FILENAME }}
+          path: ~/mod-workdir
+      - name: Extract bootstrap
+        shell: bash
+        run: |
+          tar -C ~/mod-workdir -xf ~/mod-workdir/${{ env.ARTIFACT_FILENAME }}.tar.gz
+      - name: Enable KXStudio repositories
+        run: |
+          apt-get update -qq && \
+            apt-get install -yqq gpgv wget
+          wget https://launchpad.net/~kxstudio-debian/+archive/kxstudio/+files/kxstudio-repos_11.2.0_all.deb && \
+            dpkg -i *.deb && \
+            rm *.deb
+      - name: Install dependencies (build and validation)
+        run: |
+          apt-get update -qq && \
+            apt-get install -yqq \
+                cmake g++ git libfontconfig-dev libfreetype6-dev libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev pkg-config \
+                lilv-utils lv2-dev lv2lint \
+                darkglass-lv2-extensions kxstudio-lv2-extensions mod-lv2-extensions \
+                qemu-user-static
+      - name: Build examples
+        run: |
+          .github/workflows/ci-build-examples.sh ${{ matrix.platform }}
