@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -e ~/.bashrc ]; then
+    source ~/.bashrc
+fi
+
 set -e
 
 cd $(dirname "${0}")/../..
@@ -44,10 +48,15 @@ fi
 
 }
 
-# regular desktop builds
+# regular build
 build_and_validate
 
-# Anagram specific builds
+# if already using mod-plugin-builder environment, stop here
+if [ -n "${TARGET_DIR}" ]; then
+  exit 0
+fi
+
+# build through mod-plugin-builder
 platform=${1:=darkglass-anagram}
 [ -e mod-plugin-builder ] || git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
 source ./mod-plugin-builder/local.env ${platform}
