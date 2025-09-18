@@ -12,6 +12,24 @@
 #define DISTRHO_PLUGIN_NAME "Example Gain DPF"
 
 /**
+   Plugin name abbreviation consisting of 2 or 3 characters in uppercase.
+   @note This macro is required.
+*/
+#define DISTRHO_PLUGIN_ABBREVIATION "GAI"
+
+/**
+   Path to a in-bundle/local 200x200 PNG image file to be used as the plugin's block image asset when OFF.
+   @note This macro is required.
+*/
+#define DISTRHO_PLUGIN_ANAGRAM_BLOCK_IMAGE_OFF "anagram-block-off.png"
+
+/**
+   Path to a in-bundle/local 200x200 PNG image file to be used as the plugin's block image asset when ON.
+   @note This macro is required.
+*/
+#define DISTRHO_PLUGIN_ANAGRAM_BLOCK_IMAGE_ON "anagram-block-on.png"
+
+/**
    Number of audio inputs the plugin has.
    @note This macro is required.
  */

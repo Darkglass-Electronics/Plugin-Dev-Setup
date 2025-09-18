@@ -42,3 +42,8 @@ target_include_directories(DarkglassExampleGainDPF
     PUBLIC
         .
 )
+
+# install block images in LV2 bundle
+get_target_property(LV2_BUNDLE DarkglassExampleGainDPF LV2_BUNDLE)
+configure_file(anagram-block-off.png ${LV2_BUNDLE}/anagram-block-off.png COPYONLY)
+configure_file(anagram-block-on.png ${LV2_BUNDLE}/anagram-block-on.png COPYONLY)
