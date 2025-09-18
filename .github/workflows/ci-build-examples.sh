@@ -14,9 +14,11 @@ function build_and_validate()
 echo "----------------------------------------------------- Building examples"
 for d in $(ls -d examples/*); do
     pushd ${d}
-    rm -rf build
-    ${CMAKE:=cmake} -S . -B build
-    $(which cmake) --build build -j$(nproc)
+    if [ -e CMakeLists.txt ]; then
+        rm -rf build
+        ${CMAKE:=cmake} -S . -B build
+        $(which cmake) --build build -j$(nproc)
+    fi
     popd
 done
 
