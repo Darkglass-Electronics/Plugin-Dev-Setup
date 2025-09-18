@@ -1,4 +1,6 @@
 build/
 build-anagram/
 mod-plugin-builder/
+target/
 /lv2/
+Cargo.lock

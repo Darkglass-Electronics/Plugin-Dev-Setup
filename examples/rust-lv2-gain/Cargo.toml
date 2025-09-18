@@ -1,0 +1,13 @@
+[package]
+name = "rust-lv2-gain"
+version = "1.0.0"
+authors = ["Filipe Coelho <falktx@darkglass.com>"]
+license = "ISC"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+path = "gain.rs"
+
+[dependencies]
+lv2 = "0.6.0"

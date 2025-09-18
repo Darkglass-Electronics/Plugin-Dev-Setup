@@ -1,0 +1,81 @@
+@prefix dg:    <http://www.darkglass.com/lv2/ns#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
+@prefix mod:   <http://moddevices.com/ns/mod#> .
+@prefix opts:  <http://lv2plug.in/ns/ext/options#> .
+@prefix pg:    <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix spdx:  <http://spdx.org/rdf/terms#> .
+@prefix unit:  <http://lv2plug.in/ns/extensions/units#> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-gain-rust>
+    a lv2:UtilityPlugin, lv2:Plugin, doap:Project ;
+
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
+
+    lv2:port [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 0 ;
+        lv2:symbol "audio_in" ;
+        lv2:name "Audio Input" ;
+    ] ;
+
+    lv2:port [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 1 ;
+        lv2:symbol "audio_out" ;
+        lv2:name "Audio Output" ;
+    ] ;
+
+    lv2:port [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 2 ;
+        lv2:name "Enabled" ;
+        lv2:symbol "lv2_enabled" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:designation lv2:enabled ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 3 ;
+        lv2:name "Gain" ;
+        lv2:symbol "gain" ;
+        lv2:default 0 ;
+        lv2:minimum -40 ;
+        lv2:maximum 20 ;
+        lv2:scalePoint [
+            rdfs:label  "-Inf" ;
+            rdf:value -40 ;
+        ] ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 4 ;
+        lv2:name "Invert Polarity" ;
+        lv2:symbol "inv_polarity" ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:toggled ;
+        lv2:portProperty lv2:integer ;
+    ] ;
+
+    rdfs:comment "Example gain plugin for Anagram using rust-lv2" ;
+
+    doap:name "Example Gain rust" ;
+    doap:license <http://spdx.org/licenses/ISC.html> ;
+
+    doap:maintainer [
+        foaf:name "falkTX" ;
+    ] ;
+
+    lv2:microVersion 0 ;
+    lv2:minorVersion 0 .
