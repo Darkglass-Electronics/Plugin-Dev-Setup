@@ -4,6 +4,23 @@ This repository contains documentation and examples related to developing audio 
 
 NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
 
+## LV2
+
+Audio plugins created for Anagram must be in [LV2](https://lv2plug.in/) format.  
+Dealing with LV2 specifics is outside the scope of this documentation, though we provide source-code examples that can be used as starting point or as reference implementation.
+
+Darkglass has a few custom LV2 properties to extend the plugin format to suit Anagram UI/UX.  
+All the examples provide in this repository implement these custom properties.
+
+There are no special licensing requirements for making LV2 plugins.
+
+So far these plugin frameworks official support exporting as LV2:
+
+ - [DPF](https://github.com/DISTRHO/DPF/)
+ - [JUCE](https://juce.com/)
+
+It is also possible to create LV2 plugins using [rust](https://docs.rs/lv2/latest/lv2/).
+
 ## Documentation
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.

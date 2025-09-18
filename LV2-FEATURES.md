@@ -257,6 +257,10 @@ Makes the parameter always use real numbers, so advance/decrease in whole steps.
 
 Makes the parameter use a list for selecting the value, restricting it only to the exposed scale points.
 
+#### [pprops:expensive](http://lv2plug.in/ns/ext/port-props#expensive)
+
+Prevents the parameter from being used in scenes.
+
 #### [pprops:logarithmic](http://lv2plug.in/ns/ext/port-props#logarithmic)
 
 Makes the parameter advance/decrease in logarithmic scale.
@@ -266,6 +270,10 @@ The parameter MUST NOT have 0 as a valid value in its range.
 #### [pprops:notOnGUI](http://lv2plug.in/ns/ext/port-props#notOnGUI)
 
 Hides the parameter from the user and does not save it as part of the preset.
+
+#### [dg:savedToPreset](http://www.darkglass.com/lv2/ns#savedToPreset)
+
+Ensures the parameter is always saved to preset, even if hidden.
 
 ## Parameter units
 
@@ -284,4 +292,4 @@ The following control port and/or parameter units are supported:
 | [units:mhz](http://lv2plug.in/ns/extensions/units#mhz)                     | Megahertz         | `%f MHz`   |                                       |
 | [units:cent](http://lv2plug.in/ns/extensions/units#cent)                   | Cent              | `%f ct`    |                                       |
 | [units:semitone12TET](http://lv2plug.in/ns/extensions/units#semitone12TET) | Semitone          | `%f semi`  |                                       |
-| [dgprops:oneDecimalPoint](http://www.darkglass.com/lv2/ns#oneDecimalPoint) | One Decimal Point | `%.1f`     | Special unit to force 1 decimal point |
+| [dg:oneDecimalPoint](http://www.darkglass.com/lv2/ns#oneDecimalPoint)      | One Decimal Point | `%.1f`     | Special unit to force 1 decimal point |
