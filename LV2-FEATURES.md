@@ -147,11 +147,20 @@ lv2:port [
 
 #### [kx:Reset](http://kxstudio.sf.net/ns/lv2ext/props#Reset)
 
-Trigger for clearing old buffers when changing presets
+Trigger for clearing any state memory (buffers, lfo phase etc) and setting any smoothed parameters directly to their target values.
+
+Triggered with value 1 in these cases:
+ - during preset change within bank (block already loaded and possibly run earlier)
+ - when a second synced lv2 instance is added to serve as a dual mono pair
 
 Special rules:
  - Must be trigger
  - Must have default and minimum 0
+
+Recommendations:
+ - During lv2_run apply reset after applying parameter changes so that parameter smoothing is actually skipped
+ - Apply reset in plugin internally during activate()
+ - activate() may be followed by reset on the first lv2_run. Keep track of cleared buffers especially to avoid unnecessary re-clearing of big buffers in these situations.
 
 ```ttl
 @prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
