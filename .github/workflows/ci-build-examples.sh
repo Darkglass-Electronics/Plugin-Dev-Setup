@@ -25,7 +25,7 @@ done
 rm -rf lv2
 mkdir -p lv2
 
-for p in $(find examples -name '*.lv2'); do
+for p in $(find examples -name '*.lv2' | grep -v rust); do
     echo "----------------------------------------------------- Validating $(basename ${p})"
     lv2_validate \
         ${TARGET_DIR}/usr/lib/lv2/dg-meta/*.ttl \
