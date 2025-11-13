@@ -31,6 +31,8 @@ See [CAVEATS.md](CAVEATS.md) for a few caveats to be aware of when developing pl
 
 See [LV2-FEATURES.md](LV2-FEATURES.md) for the list of LV2 features supported by Anagram.
 
+See [MULTI-THREADING.md](MULTI-THREADING.md) for how to properly handle multi-threading for Anagram, if necessary.
+
 See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
 
 ## Under the hood
