@@ -25,7 +25,7 @@ When targeting "little" cores use indexes 0 to 3.
 When targeting "big" cores use indexes 4 to 7.
 We use 4 cores here for possible future compatibility, as the RK3582 SoC used in Anagram has 2 "big" cores but is socket-compatible with RK3588 which has 4 "big" cores.
 
-NOTE: Do not create extra threads with RT priority without pinning to specific CPU cores, as then it is random which cores will be running it which creates unstable/unreliable DSP time consumption.
+**NOTE: Do not create extra threads with RT priority without pinning to specific CPU cores, as then it is random which cores will be running it which creates unstable/unreliable DSP time consumption.**
 
 ## RT priority
 
