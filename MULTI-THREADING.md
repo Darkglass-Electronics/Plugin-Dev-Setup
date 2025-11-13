@@ -29,9 +29,9 @@ We use 4 cores here for possible future compatibility, as the RK3582 SoC used in
 
 ## RT priority
 
-The plugin host used in Anagram reports to plugins the RT priority they should use for new threads through [threads:schedPriority](http://ardour.org/lv2/threads/#schedPriority) and [threads:schedPolicy](http://ardour.org/lv2/threads/#schedPolicy).
+The plugin host used in Anagram reports to plugins the RT priority they should use for new threads through [threads:schedPriority](http://ardour.org/lv2/threads/#schedPriority) and [threads:schedPolicy](http://ardour.org/lv2/threads/#schedPolicy). See [LV2-FEATURES.md](LV2-FEATURES.md).
 
-If you do not have access to this LV2 extension value (e.g. using a framework that does not expose it), you can use `MOD_PLUGIN_THREAD_PRIORITY` environment variable, which is hardcoded to `57`.
+If you do not have access to these LV2 extension values (e.g. using a framework that does not expose them), you can use `MOD_PLUGIN_THREAD_PRIORITY` environment variable, which is hardcoded to `56`.
 
 ## Example
 
@@ -47,7 +47,7 @@ Creating a thread for audio tasks, on either "big" or "little" cores separately:
     pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
 
     struct sched_param param = {
-      .sched_priority = 57;
+      .sched_priority = 56;
     };
     pthread_attr_setschedparam(&attr, &param);
 
