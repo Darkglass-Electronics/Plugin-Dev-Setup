@@ -18,7 +18,7 @@ Inside you will find instructions and more details, including a minimal plugin e
 
 If you are using DPF, you can simply add these lines to your `DistrhoPluginInfo.h` configuration file:
 
-```
+```C++
 // enable MOD licensing for Anagram (codenamed "Pablito")
 #ifdef _DARKGLASS_DEVICE_PABLITO
 #define DISTRHO_PLUGIN_LICENSED_FOR_MOD 1
