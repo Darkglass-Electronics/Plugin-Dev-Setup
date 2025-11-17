@@ -32,7 +32,7 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 ## IO
 
-- Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo) or 1in-2out.  
+- Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo).  
   Anagram will automatically load 2 instances of mono plugins if there are stereo outputs in preceding signal chain.
 
 - Plugins CAN have both mono and stereo variants exposed IFF the stereo version sounds different than dual-mono.  
