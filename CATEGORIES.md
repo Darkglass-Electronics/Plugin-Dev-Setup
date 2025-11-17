@@ -2,7 +2,7 @@
 
 This document contains information on plugin categories implemented on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).
 
-As of v1.5.0 Anagram has the following plugin categories:
+The Anagram has the following plugin categories:
 
  - Amp & Cabs
  - Overdrive & Distortion

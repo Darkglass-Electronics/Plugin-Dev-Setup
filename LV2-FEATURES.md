@@ -3,8 +3,6 @@
 This document contains information on what LV2 host features are implemented on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 Most of official extensions are implemented, with a few custom ones on top as well.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ## Host features
 
 The following host features (passed during plugin instantiation) are supported:

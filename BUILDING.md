@@ -2,8 +2,6 @@
 
 This document contains information on how to build your audio plugins for the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ## Cross compilation
 
 Because Anagram runs a custom Linux arm64 system, any system that does not match this architecture needs cross-compilation.  

@@ -5,8 +5,6 @@ specifically for Linux hosts.
 
 See [BUILDING-DOCKER.md](BUILDING-DOCKER.md) for instructions on how to build when not using Linux, through the use of docker.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ### Step 1: Direct toolchain bootstrap
 
 Simply clone the [mod-plugin-builder](https://github.com/mod-audio/mod-plugin-builder/) git repository, install its dependencies and run the bootstrap script targetting Anagram. Like so:

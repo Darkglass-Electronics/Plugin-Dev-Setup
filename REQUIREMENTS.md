@@ -3,8 +3,6 @@
 This document contains information on how plugins should behave when on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 A basic set of rules to follow in order to ensure consistency within the platform.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ## Plugin meta-data
 
 - Each Plugin MUST have a [dg:abbreviation](http://www.darkglass.com/lv2/ns#abbreviation) - a simple string consisting of 2 or 3 characters in uppercase.  
@@ -51,6 +49,8 @@ NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up a
 
 - Parameters SHOULD be grouped into sets of 6  
   Anagram "block settings" screen shows 6 parameters at a time in a paginated fashion
+
+See [LV2-FEATURES.md#parameter-designations](LV2-FEATURES.md#parameter-designations) for more information about these special designations.
 
 ## Parameter changes
 

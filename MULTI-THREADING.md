@@ -3,7 +3,7 @@
 This document contains information on how plugins should handle multi-threading when on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 A basic set of rules to follow in order to ensure consistency within the platform.
 
-NOTE: This assumes the Anagram is running version 1.8 or above.
+NOTE: This page assumes the Anagram is running version 1.8 or above.
 
 ## CPU core separation
 

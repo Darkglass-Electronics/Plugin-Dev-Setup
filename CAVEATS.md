@@ -2,8 +2,6 @@
 
 This repository contains documentation and examples related to developing audio plugins for [Darkglass Anagram](https://www.darkglass.com/products/anagram/) as a platform.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ## Caveats
 
 ### Control Ports only for now

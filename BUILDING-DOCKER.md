@@ -5,8 +5,6 @@ specifically for non-Linux hosts like macOS or Windows, through the use of docke
 
 See [BUILDING-LINUX.md](BUILDING-LINUX.md) for instructions on how to build when using Linux.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 ### Step 0: Install docker
 
 Before we start building we need to install [docker](https://www.docker.com/), as the cross-compilation steps are meant to be used under a Linux host, and docker is a nice and common way to achive that.
