@@ -3,7 +3,7 @@ name: bootstrap-docker
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 6
+  CACHE_VERSION: 7
 
 jobs:
   bootstrap:
