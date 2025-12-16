@@ -2,13 +2,14 @@
  * Korg 35 24dB Low + High Pass Filters
  * Copyright (C) 2019 Eric Tarr
  * Copyright (C) 2020 Christopher Arndt <info@chrisarndt.de>
- * Copyright (C) 2022 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2022-2025 Filipe Coelho <falktx@falktx.com>
  * SPDX-License-Identifier: MIT
  */
 
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 
 //========================================================================================
@@ -66,7 +67,7 @@ public:
 
     void setSampleRate(const float newSampleRate)
     {
-        const float c0 = std::min<float>(192000.f, std::max<float>(1.f, newSampleRate));
+        const float c0 = std::clamp<float>(newSampleRate, 1.f, 192000.f);
         c1 = 3.14159274f / c0;
         c2 = 44.0999985f / c0;
         c3 = 1.0f - c2;

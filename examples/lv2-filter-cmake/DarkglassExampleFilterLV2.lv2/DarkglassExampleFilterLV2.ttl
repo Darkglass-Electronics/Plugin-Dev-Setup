@@ -1,0 +1,95 @@
+@prefix dg:    <http://www.darkglass.com/lv2/ns#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
+@prefix mod:   <http://moddevices.com/ns/mod#> .
+@prefix opts:  <http://lv2plug.in/ns/ext/options#> .
+@prefix pg:    <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix spdx:  <http://spdx.org/rdf/terms#> .
+@prefix unit:  <http://lv2plug.in/ns/extensions/units#> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2>
+    a lv2:FilterPlugin, lv2:Plugin, doap:Project ;
+
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ,
+                        <http://www.darkglass.com/lv2/ns/lv2ext/control-port-state-update> ;
+
+    lv2:port [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 0 ;
+        lv2:symbol "in" ;
+        lv2:name "Input" ;
+    ] , [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 1 ;
+        lv2:symbol "out" ;
+        lv2:name "Output" ;
+    ] , [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 2 ;
+        lv2:name "Enabled" ;
+        lv2:symbol "enabled" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:toggled , lv2:integer ;
+        lv2:designation lv2:enabled ;
+    ] , [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 3 ;
+        lv2:name "Reset" ;
+        lv2:symbol "reset" ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer , <http://lv2plug.in/ns/ext/port-props#trigger> ;
+        lv2:designation <http://kxstudio.sf.net/ns/lv2ext/props#Reset> ;
+    ] , [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 4 ;
+        lv2:name "Type" ;
+        lv2:symbol "type" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 2 ;
+        lv2:portProperty lv2:enumeration , lv2:integer ;
+        lv2:scalePoint [
+            rdfs:label  "Off" ;
+            rdf:value 0 ;
+        ] , [
+            rdfs:label  "Low Pass" ;
+            rdf:value 1 ;
+        ] , [
+            rdfs:label  "High Pass" ;
+            rdf:value 2 ;
+        ] ;
+    ] , [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 5 ;
+        lv2:name "Frequency" ;
+        lv2:symbol "freq" ;
+        lv2:default 1000 ;
+        lv2:minimum 20 ;
+        lv2:maximum 20000 ;
+        unit:unit unit:hz ;
+    ] ;
+
+    rdfs:comment "Example plugin for Anagram using raw LV2" ;
+
+    dg:abbreviation "FLT" ;
+    # dg:blockImageOff <anagram-block-off.png> ;
+    # dg:blockImageOn <anagram-block-on.png> ;
+
+    doap:name "Example Filter" ;
+    doap:license <http://spdx.org/licenses/ISC.html> ;
+
+    doap:maintainer [
+        foaf:name "falkTX" ;
+    ] ;
+
+    lv2:microVersion 0 ;
+    lv2:minorVersion 2 .
