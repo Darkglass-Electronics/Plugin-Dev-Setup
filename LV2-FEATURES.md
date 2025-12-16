@@ -79,6 +79,13 @@ Host provides a way to "unmap" a URID identifier back to its URI string.
 
 Host provides worker threads that can be used by plugins in a thread-safe way.
 
+#### http://www.darkglass.com/lv2/ns/lv2ext/control-port-state-update
+
+Custom LV2 extension from Darkglass to deactivate and/or block certain parameters from being used.  
+This allows, for example, for one parameter to turn off another, creating a link between them.
+
+See [examples/lv2-filter-cmake/](examples/lv2-filter-cmake) for an example plugin that uses this feature.
+
 #### http://kx.studio/ns/lv2ext/control-input-port-change-request
 
 Custom LV2 extension from the KXStudio project that allows a plugin to request changes to the value of a control input port.
