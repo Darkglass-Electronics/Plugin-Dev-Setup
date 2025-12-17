@@ -60,7 +60,8 @@ if [ -n "${TARGET_DIR}" ]; then
 fi
 
 # build through mod-plugin-builder
-platform=${1:=darkglass-anagram}
+platform="${1}"
+[ -n "${platform}" ] || platform=darkglass-anagram
 [ -e mod-plugin-builder ] || git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
 source ./mod-plugin-builder/local.env ${platform}
 build_and_validate
