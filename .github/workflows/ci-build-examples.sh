@@ -12,7 +12,7 @@ function build_and_validate()
 {
 
 echo "----------------------------------------------------- Building examples"
-for d in $(ls -d examples/*); do
+for d in $(ls -d examples/* | grep -v README); do
     pushd ${d}
     if [ -e CMakeLists.txt ]; then
         rm -rf build
@@ -25,7 +25,7 @@ done
 rm -rf lv2
 mkdir -p lv2
 
-for p in $(find examples -name '*.lv2' | grep -v rust); do
+for p in $(find examples/*/build -name '*.lv2' | grep -v '/_deps/'); do
     echo "----------------------------------------------------- Validating $(basename ${p})"
     lv2_validate \
         ${TARGET_DIR}/usr/lib/lv2/dg-meta/*.ttl \
