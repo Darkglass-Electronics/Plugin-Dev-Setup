@@ -3,6 +3,14 @@
 This document contains information on how plugins should behave when on the [Darkglass Anagram](https://www.darkglass.com/products/anagram/).  
 A basic set of rules to follow in order to ensure consistency within the platform.
 
+## Plugin behaviour
+
+- Plugins MUST NOT change global CPU registers (like "flush to zero"), the host already has them set for the audio threads
+
+- Plugins MUST NOT change the "enabled"/"bypass" control on their own
+
+- Plugins SHOULD try to avoid changing parameters on their own, as it is likely to mess with Scenes
+
 ## Plugin meta-data
 
 - Each Plugin MUST have a [dg:abbreviation](http://www.darkglass.com/lv2/ns#abbreviation) - a simple string consisting of 2 or 3 characters in uppercase.  
@@ -51,11 +59,3 @@ A basic set of rules to follow in order to ensure consistency within the platfor
   Anagram "block settings" screen shows 6 parameters at a time in a paginated fashion
 
 See [LV2-FEATURES.md#parameter-designations](LV2-FEATURES.md#parameter-designations) for more information about these special designations.
-
-## Parameter changes
-
-- Plugins MUST NOT change global CPU registers (like "flush to zero"), the host already has them set
-
-- Plugins MUST NOT change the "enabled"/"bypass" control on their own
-
-- Plugins SHOULD try to avoid changing parameters on their own, as it is likely to mess with Scenes
