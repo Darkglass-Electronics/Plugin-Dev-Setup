@@ -11,15 +11,16 @@ It meets Anagram requirements:
 TODO:
  - contains block images
 
-### Anagram specific properties
-
 This plugin has 2 controls:
 
  - Type
  - Frequency
 
-The **Type** parameter influences the behaviour of the **Frequency** one, where the first value is "Off".  
-This plugin implements the "Control Port State Update" extension to indicate that **Frequency** is "Inactive" when **Type** is "Off".
+The *Type* parameter influences the behaviour of the *Frequency* one, where the first value is "Off".
+
+### Anagram specific properties
+
+This plugin implements the [Control Port State Update](https://github.com/Darkglass-Electronics/LV2-Extensions/blob/main/dg-control-port-state-update.lv2/control-port-state-update.h) extension to indicate that *Frequency* is "Inactive" when *Type* is "Off".
 
 ## Building and deploy
 
