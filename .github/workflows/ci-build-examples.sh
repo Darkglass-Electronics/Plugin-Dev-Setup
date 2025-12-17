@@ -29,6 +29,7 @@ for p in $(find examples -name '*.lv2' | grep -v rust); do
     echo "----------------------------------------------------- Validating $(basename ${p})"
     lv2_validate \
         ${TARGET_DIR}/usr/lib/lv2/dg-meta/*.ttl \
+        ${TARGET_DIR}/usr/lib/lv2/dg-control-port-state-update.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-properties.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-control-input-port-change-request.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-meta/*.ttl \
