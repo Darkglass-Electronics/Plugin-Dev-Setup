@@ -16,7 +16,7 @@ This plugin has 2 controls:
  - Type
  - Frequency
 
-The *Type* parameter influences the behaviour of the *Frequency* one, where the first value is "Off".
+The *Type* parameter influences the behaviour of the *Frequency* one.
 
 ### Anagram specific properties
 
