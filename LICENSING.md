@@ -25,7 +25,7 @@ If you are using DPF, you can simply add these lines to your `DistrhoPluginInfo.
 #endif
 ```
 
-We will integrate this library API into our [custom JUCE LV2 wrapper](https://github.com/Darkglass-Electronics/juce-anagram-lv2.git) soon.
+For JUCE this library is always in use, as we assume developers using JUCE will want to release commercial plugins.
 
 There is no way to use this licensing mechanism for Rust-based plugins for now.
 
