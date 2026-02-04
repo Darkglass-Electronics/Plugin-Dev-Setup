@@ -11,7 +11,7 @@ NOTE: None of the information in document is present on a public release as the 
 It is possible to stylize the block and block settings of a plugin through the use of a Darkglass LV2 extension.  
 This extension defines properties related to alignment, fonts, images and positioning.
 
-For a high-level overview of all the possible properties and their relationship see [custom-styling.hpp](https://github.com/Darkglass-Electronics/mod-connector/blob/custom-styling/src/custom-styling.hpp) which is a C++ representation used by our LV2 host.
+For a high-level overview of all the possible properties and their relationship see [custom-styling.hpp](https://github.com/Darkglass-Electronics/mod-connector/blob/main/src/custom-styling.hpp) which is a C++ representation used by our LV2 host.
 
 Because many plugin frameworks automatically generate LV2 ttl, we recommend to store all the styling related information in a separate file and only reference it through "seeAlso" on the `manifest.ttl` entry point.  
 For example:
@@ -68,10 +68,12 @@ dgcs:path
 # part of a font; sets the size
 dgcs:size
 
-# part of a block parameter; sets the image position
-# NOTE only applies to dgcs:block parameters, not dgcs:blockSettings
+# part of a block parameter; sets the image position and single-frame size
+# NOTE only applies to dgcs:blockImage parameters, not dgcs:blockSettings
 dgcs:x
 dgcs:y
+dgcs:width
+dgcs:height
 
 ###############################################################################
 # combined properties
@@ -128,7 +130,7 @@ dgcs:toggle
 # high-level properties
 
 # the styling for a block
-dgcs:block
+dgcs:blockImage
 
 # the styling for a block's settings
 dgcs:blockSettings
