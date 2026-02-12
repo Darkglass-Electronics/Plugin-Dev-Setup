@@ -8,7 +8,7 @@ NOTE: None of the information in document is present on a public release as the 
 
 ## Styling
 
-It is possible to stylize the block and block settings of a plugin through the use of a Darkglass LV2 extension.  
+It is possible to stylize the block and block settings of a plugin through the use of a [custom Darkglass LV2 extension](https://github.com/Darkglass-Electronics/LV2-Extensions/blob/main/dg-custom-styling.lv2/custom-styling.ttl).  
 This extension defines properties related to alignment, fonts, images and positioning.
 
 For a high-level overview of all the possible properties and their relationship see [custom-styling.hpp](https://github.com/Darkglass-Electronics/mod-connector/blob/main/src/custom-styling.hpp) which is a C++ representation used by our LV2 host.
