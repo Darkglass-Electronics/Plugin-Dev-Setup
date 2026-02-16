@@ -1,0 +1,12 @@
+@prefix dgcs: <http://www.darkglass.com/lv2/ns/lv2ext/custom-styling#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
+    dgcs:blockSettings [
+        dgcs:topBarButtons [
+            dgcs:close <artwork/button-close.png> ;
+            dgcs:more <artwork/button-more.png> ;
+            dgcs:remove <artwork/button-remove.png> ;
+            dgcs:swap <artwork/button-swap.png> ;
+        ];
+    ] .
