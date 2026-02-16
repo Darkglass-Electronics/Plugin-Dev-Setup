@@ -101,7 +101,7 @@ Simply do:
 make -C /path/to/your/project
 ```
 
-### Step 3: Deploy plugin
+### Step 4: Deploy plugin
 
 Assuming you have an Anagram unit running in Developer Mode, you can just do:
 
