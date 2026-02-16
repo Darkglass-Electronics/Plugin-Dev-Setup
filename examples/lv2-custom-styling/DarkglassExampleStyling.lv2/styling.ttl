@@ -4,15 +4,37 @@
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
     dgcs:blockSettings [
         a dgcs:BlockSettings ;
-        dgcs:topBarButtons [
-            a dgcs:BlockSettingsTopBarButtons ;
-            dgcs:close <artwork/button-close.png> ;
-            dgcs:more <artwork/button-more.png> ;
-            dgcs:remove <artwork/button-remove.png> ;
-            dgcs:swap <artwork/button-swap.png> ;
+
+        # The bottom-most background image
+        # Can contain multiple horizontal frames for paginated scrolling,
+        # in which case it must be a multiple of the screen width
+        # (on Anagram this is 1424px)
+        dgcs:background [
+            a dgcs:BlockImage ;
+            dgcs:path <artwork/background.png> ;
         ] ;
+
+        # The pagination dots assume a number of frames equivalent to the number of parameter pages
+        # They are 1 layer above the background
         dgcs:paginationDots [
             a dgcs:BlockImage ;
             dgcs:path <artwork/pagination-dots.png> ;
+        ] ;
+
+        # padding of empty slots until parameters begin
+        dgcs:parameterStartPadding 3 ;
+
+        # The settings' top-bar buttons are images without any alignment
+        # These images must be the correct size or are otherwise rejected
+        # They are 1 layer above the block name
+        dgcs:topBarButtons [
+            a dgcs:BlockSettingsTopBarButtons ;
+            # 85x50
+            # TODO back
+            dgcs:close <artwork/button-close.png> ;
+            # 50x50
+            dgcs:more <artwork/button-more.png> ;
+            dgcs:remove <artwork/button-remove.png> ;
+            dgcs:swap <artwork/button-swap.png> ;
         ] ;
     ] .
