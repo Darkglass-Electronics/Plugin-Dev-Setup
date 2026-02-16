@@ -7,6 +7,9 @@
 # If the image belongs to a bypass control, at least 2 animation frames are required (on is first, then off/bypassed)
 # If the image belongs to a block, animation frames are optional (if present: on is first, then off/bypassed)
 
+# For fonts:
+# A font requires a path and size
+
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
     dgcs:blockSettings [
         a dgcs:BlockSettings ;
