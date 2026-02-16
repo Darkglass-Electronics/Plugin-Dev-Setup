@@ -3,10 +3,16 @@
 
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
     dgcs:blockSettings [
+        a dgcs:BlockSettings ;
         dgcs:topBarButtons [
+            a dgcs:BlockSettingsTopBarButtons ;
             dgcs:close <artwork/button-close.png> ;
             dgcs:more <artwork/button-more.png> ;
             dgcs:remove <artwork/button-remove.png> ;
             dgcs:swap <artwork/button-swap.png> ;
-        ];
+        ] ;
+        dgcs:paginationDots [
+            a dgcs:BlockImage ;
+            dgcs:path <artwork/pagination-dots.png> ;
+        ] ;
     ] .
