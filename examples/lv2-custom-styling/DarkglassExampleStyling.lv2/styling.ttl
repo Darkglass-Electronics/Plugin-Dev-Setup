@@ -1,6 +1,12 @@
 @prefix dgcs: <http://www.darkglass.com/lv2/ns/lv2ext/custom-styling#> .
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
 
+# For images:
+# An image requires a path, alignment is optional as it is not always relevant
+# If the image belongs to a parameter control, animation frames must be used (from min to max)
+# If the image belongs to a bypass control, at least 2 animation frames are required (on is first, then off/bypassed)
+# If the image belongs to a block, animation frames are optional (if present: on is first, then off/bypassed)
+
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
     dgcs:blockSettings [
         a dgcs:BlockSettings ;
@@ -14,6 +20,17 @@
             dgcs:path <artwork/background.png> ;
         ] ;
 
+        # The block name can either be a background image or a custom font
+        # Use of background image takes precedence if both are provided
+        # It is 1 layer above the background
+        dgcs:blockName [
+            a dgcs:BlockSettingsBlockName ;
+            dgcs:background [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/block-name.png> ;
+            ] ;
+        ] ;
+
         # The pagination dots assume a number of frames equivalent to the number of parameter pages
         # They are 1 layer above the background
         dgcs:paginationDots [
@@ -21,20 +38,59 @@
             dgcs:path <artwork/pagination-dots.png> ;
         ] ;
 
-        # padding of empty slots until parameters begin
-        dgcs:parameterStartPadding 3 ;
-
         # The settings' top-bar buttons are images without any alignment
         # These images must be the correct size or are otherwise rejected
         # They are 1 layer above the block name
         dgcs:topBarButtons [
             a dgcs:BlockSettingsTopBarButtons ;
             # 85x50
-            # TODO back
+            dgcs:back <artwork/button-back.png> ;
             dgcs:close <artwork/button-close.png> ;
             # 50x50
             dgcs:more <artwork/button-more.png> ;
             dgcs:remove <artwork/button-remove.png> ;
             dgcs:swap <artwork/button-swap.png> ;
+        ] ;
+
+        # Bypass control in the top-bar
+        # The bypass control uses images for background, background-with-scenes and toggle-switch control
+        # Additionally it has an overlay for "in use"
+        # Only the control is required, everything else is optional
+        dgcs:bypass [
+            a dgcs:BlockSettingsBypass ;
+            dgcs:background [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/bypass-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/bypass-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/bypass-control.png> ;
+            ] ;
+            # TODO overlays
+        ] ;
+
+        # padding of empty slots until parameters begin
+        dgcs:parameterStartPadding 3 ;
+
+        # Default parameter widgets in case a specific parameter is not specified
+        dgcs:toggle [
+            a dgcs:BlockSettingsParameter ;
+            dgcs:background [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/parameter-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/parameter-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:BlockImage ;
+                dgcs:path <artwork/toggle.png> ;
+            ] ;
+            # TODO overlays
         ] ;
     ] .

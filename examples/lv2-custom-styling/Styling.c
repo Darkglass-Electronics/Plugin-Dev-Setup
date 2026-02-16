@@ -30,11 +30,11 @@ typedef enum {
     kPortCount
 } Ports;
 
-// plugin struct, in this example we just hold pointers for our ports
 typedef struct {
     const float* in;
     float* out;
     float* meter;
+    float meterValue;
 } ExamplePlugin;
 
 static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
@@ -42,7 +42,7 @@ static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
                                   const char* bundlepath,
                                   const LV2_Feature* const* features)
 {
-    return malloc(sizeof(ExamplePlugin));
+    return calloc(1, sizeof(ExamplePlugin));
 }
 
 static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
@@ -56,6 +56,9 @@ static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
     case kPortOutput:
         plugin->out = data;
         break;
+    case kPortMeter:
+        plugin->meter = data;
+        break;
     }
 }
 
@@ -65,6 +68,12 @@ static void lv2_run(LV2_Handle handle, uint32_t numSamples)
 
     if (plugin->out != plugin->in)
         memcpy(plugin->out, plugin->in, sizeof(float) * numSamples);
+
+    // arbitrary increase just for testing
+    plugin->meterValue += 0.0001f * numSamples;
+
+    if (plugin->meterValue > 10.f)
+        plugin->meterValue = 0.f;
 }
 
 static void lv2_cleanup(LV2_Handle handle)
