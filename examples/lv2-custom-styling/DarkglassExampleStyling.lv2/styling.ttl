@@ -33,13 +33,15 @@
         # The top-bar background and buttons
         # It is 1 layer above the background
         dgcs:topBar [
+            a dgcs:BlockSettingsTopBar ;
+
             # The top-bar image cannot contain multiple frames
             dgcs:background [
                 a dgcs:Image ;
                 dgcs:path <artwork/top-bar.png> ;
             ] ;
 
-            # The top-bar block name in the can either be a background image or a custom font
+            # The top-bar block name can either be a background image or a custom font
             # Use of background image takes precedence if both are provided
             dgcs:topBarBlockName [
                 a dgcs:BlockSettingsTopBarBlockName ;
@@ -49,7 +51,7 @@
                 ] ;
             ] ;
 
-            # The settings' top-bar buttons are images without any alignment
+            # The top-bar buttons are images without any alignment
             # These images must be the correct size or are otherwise rejected
             dgcs:topBarButtons [
                 a dgcs:BlockSettingsTopBarButtons ;
@@ -62,7 +64,7 @@
                 dgcs:buttonSwap <artwork/button-swap.png> ;
             ] ;
 
-            # The the top-bar scene control can either be images or background + font
+            # The top-bar scene control can either be images or background + font
             # Use of images takes precedence if both are provided
             dgcs:topBarSceneControl [
                 a dgcs:BlockSettingsTopBarSceneControl ;
@@ -103,7 +105,7 @@
 
         # Default parameter widgets in case a specific parameter is not specified
         dgcs:toggle [
-            a dgcs:BlockSettingsParameter ;
+            a dgcs:BlockSettingsDefaultWidget ;
             dgcs:background [
                 a dgcs:Image ;
                 dgcs:path <artwork/parameter-background.png> ;
