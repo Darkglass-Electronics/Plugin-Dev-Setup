@@ -35,7 +35,7 @@
         dgcs:topBar [
             # The top-bar image cannot contain multiple frames
             dgcs:background [
-                a dgcs:path ;
+                a dgcs:Image ;
                 dgcs:path <artwork/top-bar.png> ;
             ] ;
 
