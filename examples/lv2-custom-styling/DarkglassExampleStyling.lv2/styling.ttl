@@ -28,6 +28,8 @@
         dgcs:paginationDots [
             a dgcs:Image ;
             dgcs:path <artwork/pagination-dots.png> ;
+            dgcs:alignment dgcs:alignBottomMid ;
+            dgcs:offsetY -4 ;
         ] ;
 
         # The top-bar background and buttons
