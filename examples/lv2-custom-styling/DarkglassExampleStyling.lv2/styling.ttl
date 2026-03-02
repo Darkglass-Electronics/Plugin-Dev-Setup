@@ -72,11 +72,11 @@
                 a dgcs:BlockSettingsTopBarSceneControl ;
                 dgcs:sceneControlActiveScene [
                     a dgcs:Image ;
-                    dgcs:path <artwork/background.png> ;
+                    dgcs:path <artwork/scene-control-active.png> ;
                 ] ;
                 dgcs:sceneControlAllScenes [
                     a dgcs:Image ;
-                    dgcs:path <artwork/background.png> ;
+                    dgcs:path <artwork/scene-control-all.png> ;
                 ] ;
             ] ;
         ] ;
