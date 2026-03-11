@@ -156,7 +156,7 @@ Trigger for clearing any state memory (buffers, lfo phase etc) and setting any s
 
 Triggered with value 1 in these cases:
  - during preset change within bank (block already loaded and possibly run earlier)
- - during preset bank load (unless all block was saved with all default values to preset)
+ - during preset bank load (unless block was saved with all default values to preset)
  - when a second synced lv2 instance is added to serve as a dual mono pair
  - when the block is reset to default values
 
@@ -168,8 +168,6 @@ Recommendations:
  - During lv2_run apply reset after applying parameter changes so that parameter smoothing is actually skipped
  - Apply reset in plugin internally during activate()
  - activate() may be followed by reset on the first lv2_run. Keep track of cleared buffers especially to avoid unnecessary re-clearing of big buffers in these situations.
-
-Note: In future updates of Anagram KosmOS, resets are planned for certain 0-sample "pre-run" calls to lv2_run.
 
 ```ttl
 @prefix lv2:    <http://lv2plug.in/ns/lv2core#> .

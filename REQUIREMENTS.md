@@ -40,13 +40,13 @@ A basic set of rules to follow in order to ensure consistency within the platfor
 
 - Plugins MUST always have 1in-1out (mono) or 2in-2out (stereo).  
   Anagram will automatically load 2 instances of mono plugins if there are stereo outputs in preceding signal chain.  
-  IMPORTANT: There are situations where 2 instances run for dual mono and they receive the same input signal. For this the kx:Reset port needs to be implemented so that after triggering a reset the 2 instances give same output for the same input regardless of the input before the reset.
+  IMPORTANT: When 2 mono instances are used together and they receive the same input signal, we expect them to give the same output. The kx:Reset port needs to be implemented so that a reset triggered for these 2 mono instances simultaneously syncs them fully (phase, state memory etc).
 
 - Plugins CAN have both mono and stereo variants exposed IFF the stereo version sounds different than dual-mono.  
   LV2 does not provide support for dynamic IO, we have our internal solution for this by exposing mono and stereo variants of the same plugin.  
   Please contact us if you have such a plugin.
 
-- If you’re implementing an inherently mono-to-stereo algorithm, the plugin should be implemented with a 2in-2out audio IO and sum the two input channels internally in the plugin. As this breaks any possible preceding stereo information in the signal chain, the recommendation is to warn the users about that in the plugin’s marketplace description.
+- If you're implementing an inherently mono-to-stereo algorithm, the plugin should be implemented with a 2in-2out audio IO and sum the two input channels internally in the plugin. As this breaks any possible preceding stereo information in the signal chain, the recommendation is to warn the users about that in the plugin's description.
 
 ## Parameters
 
@@ -65,11 +65,13 @@ See [LV2-FEATURES.md#parameter-designations](LV2-FEATURES.md#parameter-designati
 
 ## Scene Mode
 
-Scene changes should be smooth without silences or abrupt pops or clicks. The audio must remain continuous during scene transitions. Parameters which require fading out and fading in for smooth transition should be blocked from Scenes. Darkglass has blocked e.g. changing the loaded model in file loading plugins from Scenes. A plugin port can be blocked from Scenes using the [pprops:expensive](http://lv2plug.in/ns/ext/port-props#expensive) lv2 port property.
+In Anagram, Scene changes should be smooth without silences or abrupt pops or clicks. The audio must remain continuous during Scene transitions. Parameters which require fading out and fading in for smooth transition should not be allowed in Scenes. For example in our Cabinet Loaders, changing the IR file is not possible using Scenes. A parameter is not allowed in Scenes when it has the [pprops:expensive](http://lv2plug.in/ns/ext/port-props#expensive) lv2 port property.
 
 ## Plugin pre-run
 
-Plugin should prepare to receive lv2_run calls with 0 samples. In the future, these "pre-run" calls are planned to be used after plugin activation and in certains situations together with kx:Reset to allow the plugin to do heavier initialization tasks that require the port values to already be set and may be heavier than normal processing.
+The plugin will sometimes receive lv2_run with 0 samples, which can be used for "pre-run" warmup and initialization tasks that may be heavier than normal processing (but still with audio/realtime constraints in mind). [Plugins MUST NOT crash when receiving 0 samples.](https://lv2plug.in/c/html/group__lv2core.html#a3cb9de627507db42e338384ab945660e)
+
+Note: If you use a plugin framework like DPF or JUCE, they will already take care of this case and not pass 0-sample lv2_run into process function
 
 ## Reference level for audio
 
