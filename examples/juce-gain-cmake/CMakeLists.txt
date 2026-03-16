@@ -66,6 +66,7 @@ juce_anagram_lv2_setup(DarkglassExampleGainJUCE
     CATEGORY "lv2:UtilityPlugin"
     BLOCK_IMAGE_OFF "images/block-off.png"
     BLOCK_IMAGE_ON "images/block-on.png"
+    IS_FREEWARE TRUE
 )
 
 # Set extra compile definitions to reduce features and thus our binary size too

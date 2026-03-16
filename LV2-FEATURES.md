@@ -156,7 +156,9 @@ Trigger for clearing any state memory (buffers, lfo phase etc) and setting any s
 
 Triggered with value 1 in these cases:
  - during preset change within bank (block already loaded and possibly run earlier)
+ - during preset bank load (unless block was saved with all default values to preset)
  - when a second synced lv2 instance is added to serve as a dual mono pair
+ - when the block is reset to default values
 
 Special rules:
  - Must be trigger
