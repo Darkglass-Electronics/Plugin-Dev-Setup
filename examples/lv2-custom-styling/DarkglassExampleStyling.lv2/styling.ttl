@@ -124,11 +124,11 @@
             # TODO overlays
         ] ;
 
-        # Parameter-specific widgets, indexed by control port symbol
+        # Parameter-specific widgets, connected to a control port by symbol
         dgcs:parameters [
             a dgcs:BlockSettingsParameterWidget ;
-            lv2:index 10 ;
-            lv2:symbol "meter" ;
+            lv2:index 10 ; # index of the widget in the list of parameter widgets on screen, not the lv2 port index
+            lv2:symbol "meter" ; # symbol of the lv2 control port
             dgcs:control [
                 a dgcs:Image ;
                 dgcs:path <artwork/toggle.png> ;
