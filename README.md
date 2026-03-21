@@ -35,6 +35,8 @@ See [MULTI-THREADING.md](MULTI-THREADING.md) for how to properly handle multi-th
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for details on how we expect plugins to behave.
 
+See [TIME.md](TIME.md) for details on how plugins can receive time-related information.
+
 ## Under the hood
 
 Developing for Anagram means developing for a Linux-embed ARMv8.2 64-bit multi-core system, with 4 "little" CPU cores dedicated to system and graphics and 2 "big" CPU cores dedicated to audio.  
