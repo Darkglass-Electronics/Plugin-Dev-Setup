@@ -96,7 +96,7 @@
                 dgcs:path <artwork/bypass-background-scenes.png> ;
             ] ;
             dgcs:control [
-                a dgcs:Image ;
+                a dgcs:BlockSettingsBypassControlImage ;
                 dgcs:path <artwork/bypass-control.png> ;
                 dgcs:width 107 ;
             ] ;
