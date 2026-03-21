@@ -100,6 +100,13 @@ The following control port designations are supported:
 
 > NOTE: the href target is the designation URI, not always a valid URL.
 
+#### [dg:quickPot](http://www.darkglass.com/lv2/ns#quickPot)
+
+Set this parameter as the Quick Pot for a plugin.
+
+This is used when rotating a pot in the signal chain, which will change the "quick pot" parameter of the block just below the knob.  
+This action is not available when zoomed out.
+
 #### [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled)
 
 Boolean for bypass/enabled state; 1 means enabled, 0 means bypassed
@@ -286,6 +293,12 @@ The parameter MUST NOT have 0 as a valid value in its range.
 #### [pprops:notOnGUI](http://lv2plug.in/ns/ext/port-props#notOnGUI)
 
 Hides the parameter from the user and does not save it as part of the preset.
+
+#### [dg:mayUpdateBlockedState](http://www.darkglass.com/lv2/ns#mayUpdateBlockedState)
+
+Informs the host the parameter may be blocked from use, see "control-port-state-update" feature mentioned elsewhere in this document.
+
+This property also prevents the parameter from being used in scenes and bindings.
 
 #### [dg:savedToPreset](http://www.darkglass.com/lv2/ns#savedToPreset)
 
