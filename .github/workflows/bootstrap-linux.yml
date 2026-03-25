@@ -3,7 +3,7 @@ name: bootstrap-linux
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 1
+  CACHE_VERSION: 2
   CT_ALLOW_BUILD_AS_ROOT_SURE: 1
   DEBIAN_FRONTEND: noninteractive
   FORCE_UNSAFE_CONFIGURE: 1
