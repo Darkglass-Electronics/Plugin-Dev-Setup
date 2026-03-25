@@ -50,7 +50,7 @@ A basic set of rules to follow in order to ensure consistency within the platfor
 
 ## Parameters
 
-- Parameters MUST have smoothing relevant (at least when there would be audio artifacts without it)
+- Parameters MUST have smoothing where relevant (at least when there would be audio artifacts without it)
 
 - [lv2:enabled](http://lv2plug.in/ns/lv2core#enabled) designation MUST be implemented as an [lv2:ControlPort](http://lv2plug.in/ns/lv2core#ControlPort), for smooth bypass on/off
 
