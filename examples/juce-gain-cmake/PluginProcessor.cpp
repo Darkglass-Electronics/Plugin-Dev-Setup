@@ -14,7 +14,7 @@ static constexpr float maxGainDB = 20.f;
 
 //=====================================================================================================================
 // reuse bypass and gain parameter handling logic for this simple example
-// if bypassed, set smooth gain to 0dB
+// if bypassed, set smooth gain to 1.f (or 0dB)
 // if enabled, set smooth gain as the coefficient from dB
 
 static float gainCoef(bool bypass, float gainDB)
