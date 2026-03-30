@@ -111,11 +111,11 @@
             a dgcs:BlockSettingsDefaultWidget ;
             dgcs:background [
                 a dgcs:Image ;
-                dgcs:path <artwork/parameter-background.png> ;
+                dgcs:path <artwork/toggle-background.png> ;
             ] ;
             dgcs:backgroundScenes [
                 a dgcs:Image ;
-                dgcs:path <artwork/parameter-background-scenes.png> ;
+                dgcs:path <artwork/toggle-background-scenes.png> ;
             ] ;
             dgcs:control [
                 a dgcs:Image ;
@@ -127,8 +127,73 @@
         # Parameter-specific widgets, connected to a control port by symbol
         dgcs:parameters [
             a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "integer" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-int-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-int-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float1" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float1-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float1-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float2" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float2-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float2-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float3" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float3-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float3-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
             lv2:index 10 ; # index of the widget in the list of parameter widgets on screen, not the lv2 port index
             lv2:symbol "meter" ; # symbol of the lv2 control port
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-meter-background.png> ;
+            ] ;
+            # TODO
             dgcs:control [
                 a dgcs:Image ;
                 dgcs:path <artwork/toggle.png> ;
