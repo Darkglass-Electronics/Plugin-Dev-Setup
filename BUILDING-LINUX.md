@@ -16,7 +16,7 @@ git clone https://github.com/mod-audio/mod-plugin-builder
 # install deps, taken from its README file
 sudo apt install acl bc curl cvs git mercurial rsync subversion wget \
 bison bzip2 flex gawk gperf gzip help2man nano perl patch tar texinfo unzip \
-automake binutils build-essential cpio libtool libncurses-dev pkg-config python-is-python3 libtool-bin
+automake binutils build-essential cpio libtool libcrypt-dev libncurses-dev pkg-config python-is-python3 libtool-bin
 
 # bootstrap toolchain
 ./mod-plugin-builder/bootstrap.sh darkglass-anagram
