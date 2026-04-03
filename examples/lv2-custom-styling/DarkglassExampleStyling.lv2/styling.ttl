@@ -1,0 +1,203 @@
+@prefix dgcs: <http://www.darkglass.com/lv2/ns/lv2ext/custom-styling#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+
+# For images:
+# An image requires a path, alignment is optional as it is not always relevant
+# If the image belongs to a parameter control, animation frames must be used (from min to max)
+# If the image belongs to a bypass control, at least 2 animation frames are required (on is first, then off/bypassed)
+# If the image belongs to a block, animation frames are optional (if present: on is first, then off/bypassed)
+
+# For fonts:
+# A font requires a path and size
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
+    dgcs:blockSettings [
+        a dgcs:BlockSettings ;
+
+        # The bottom-most background image
+        # Can contain multiple horizontal frames for paginated scrolling,
+        # in which case it must be a multiple of the screen width
+        # (on Anagram this is 1424px)
+        dgcs:background [
+            a dgcs:Image ;
+            dgcs:path <artwork/background.png> ;
+        ] ;
+
+        # The pagination dots assume a number of frames equivalent to the number of parameter pages
+        # They are 1 layer above the background
+        dgcs:paginationDots [
+            a dgcs:Image ;
+            dgcs:path <artwork/pagination-dots.png> ;
+            dgcs:alignment dgcs:alignBottomMid ;
+            dgcs:offsetY -4 ;
+        ] ;
+
+        # The top-bar background and buttons
+        # It is 1 layer above the background
+        dgcs:topBar [
+            a dgcs:BlockSettingsTopBar ;
+
+            # The top-bar image cannot contain multiple frames
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/top-bar.png> ;
+            ] ;
+
+            # The top-bar block name can either be a background image or a custom font
+            # Use of background image takes precedence if both are provided
+            dgcs:topBarBlockName [
+                a dgcs:BlockSettingsTopBarBlockName ;
+                dgcs:background [
+                    a dgcs:Image ;
+                    dgcs:path <artwork/block-name.png> ;
+                ] ;
+            ] ;
+
+            # The top-bar buttons are images without any alignment
+            # These images must be the correct size or are otherwise rejected
+            dgcs:topBarButtons [
+                a dgcs:BlockSettingsTopBarButtons ;
+                # 85x50
+                dgcs:buttonBack <artwork/button-back.png> ;
+                dgcs:buttonClose <artwork/button-close.png> ;
+                # 50x50
+                dgcs:buttonMore <artwork/button-more.png> ;
+                dgcs:buttonRemove <artwork/button-remove.png> ;
+                dgcs:buttonSwap <artwork/button-swap.png> ;
+            ] ;
+
+            # The top-bar scene control can either be images or background + font
+            # Use of images takes precedence if both are provided
+            dgcs:topBarSceneControl [
+                a dgcs:BlockSettingsTopBarSceneControl ;
+                dgcs:sceneControlActiveScene [
+                    a dgcs:Image ;
+                    dgcs:path <artwork/scene-control-active.png> ;
+                ] ;
+                dgcs:sceneControlAllScenes [
+                    a dgcs:Image ;
+                    dgcs:path <artwork/scene-control-all.png> ;
+                ] ;
+            ] ;
+        ] ;
+
+        # Bypass control in the top-bar
+        # The bypass control uses images for background, background-with-scenes and toggle-switch control
+        # Additionally it has an overlay for "in use"
+        # Only the control is required, everything else is optional
+        dgcs:bypass [
+            a dgcs:BlockSettingsBypass ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/bypass-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/bypass-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:BlockSettingsBypassControlImage ;
+                dgcs:path <artwork/bypass-control.png> ;
+                dgcs:width 107 ;
+            ] ;
+            # TODO overlays
+        ] ;
+
+        # padding of empty slots until parameters begin
+        dgcs:parameterStartPadding 3 ;
+
+        # Default parameter widgets in case a specific parameter is not specified
+        dgcs:toggle [
+            a dgcs:BlockSettingsDefaultWidget ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/toggle-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/toggle-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/toggle.png> ;
+            ] ;
+            # TODO overlays
+        ] ;
+
+        # Parameter-specific widgets, connected to a control port by symbol
+        dgcs:parameters [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "integer" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-int-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-int-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float1" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float1-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float1-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float2" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float2-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float2-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:symbol "float3" ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float3-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-float3-background-scenes.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-control.png> ;
+            ] ;
+        ] , [
+            a dgcs:BlockSettingsParameterWidget ;
+            lv2:index 10 ; # index of the widget in the list of parameter widgets on screen, not the lv2 port index
+            lv2:symbol "meter" ; # symbol of the lv2 control port
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-meter-background.png> ;
+            ] ;
+            # TODO
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/toggle.png> ;
+            ] ;
+            # TODO overlays
+        ] ;
+    ] .

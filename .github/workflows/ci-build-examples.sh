@@ -30,6 +30,7 @@ for p in $(find examples/*/build -name '*.lv2' | grep -v '/_deps/'); do
     lv2_validate \
         ${TARGET_DIR}/usr/lib/lv2/dg-meta/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-control-port-state-update.lv2/*.ttl \
+        ${TARGET_DIR}/usr/lib/lv2/dg-custom-styling.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-properties.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-control-input-port-change-request.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-meta/*.ttl \
