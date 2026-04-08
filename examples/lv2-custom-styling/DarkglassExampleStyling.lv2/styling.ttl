@@ -100,11 +100,24 @@
                 dgcs:path <artwork/bypass-control.png> ;
                 dgcs:width 107 ;
             ] ;
-            # TODO overlays
         ] ;
 
         # padding of empty slots until parameters begin
         dgcs:parameterStartPadding 3 ;
+
+        dgcs:list [
+            a dgcs:BlockSettingsDefaultWidget ;
+            dgcs:background [
+                a dgcs:Image ;
+                dgcs:path <artwork/toggle-background.png> ;
+            ] ;
+            dgcs:control [
+                a dgcs:Image ;
+                dgcs:path <artwork/param-list.png> ;
+                dgcs:offsetY 15 ;
+            ] ;
+        ] ;
+
 
         # Default parameter widgets in case a specific parameter is not specified
         dgcs:toggle [
@@ -121,7 +134,6 @@
                 a dgcs:Image ;
                 dgcs:path <artwork/toggle.png> ;
             ] ;
-            # TODO overlays
         ] ;
 
         # Parameter-specific widgets, connected to a control port by symbol
@@ -191,13 +203,11 @@
             lv2:symbol "meter" ; # symbol of the lv2 control port
             dgcs:background [
                 a dgcs:Image ;
-                dgcs:path <artwork/param-meter-background.png> ;
+                dgcs:path <artwork/toggle-background.png> ;
             ] ;
-            # TODO
             dgcs:control [
                 a dgcs:Image ;
-                dgcs:path <artwork/toggle.png> ;
+                dgcs:path <artwork/param-meter.png> ;
             ] ;
-            # TODO overlays
         ] ;
     ] .

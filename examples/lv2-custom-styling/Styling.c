@@ -74,6 +74,8 @@ static void lv2_run(LV2_Handle handle, uint32_t numSamples)
 
     if (plugin->meterValue > 10.f)
         plugin->meterValue = 0.f;
+
+    *plugin->meter = plugin->meterValue;
 }
 
 static void lv2_cleanup(LV2_Handle handle)

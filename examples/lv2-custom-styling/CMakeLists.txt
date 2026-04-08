@@ -32,6 +32,7 @@ FetchContent_MakeAvailable(LV2)
 
 # Setup a shared library as the plugin binary
 add_library(DarkglassExampleStyling SHARED)
+add_dependencies(DarkglassExampleStyling copy_artwork)
 
 set_target_properties(DarkglassExampleStyling
     PROPERTIES
@@ -63,3 +64,9 @@ configure_file("DarkglassExampleStyling.lv2/styling.ttl"
 # TODO install block images in LV2 bundle
 #configure_file(anagram-block-off.png ${LV2_BUNDLE}/anagram-block-off.png COPYONLY)
 #configure_file(anagram-block-on.png ${LV2_BUNDLE}/anagram-block-on.png COPYONLY)
+
+add_custom_target(copy_artwork ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/DarkglassExampleStyling.lv2/artwork"
+        "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleStyling.lv2/artwork"
+)
