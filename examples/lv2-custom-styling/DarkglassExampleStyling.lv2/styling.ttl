@@ -109,12 +109,15 @@
             a dgcs:BlockSettingsDefaultWidget ;
             dgcs:background [
                 a dgcs:Image ;
-                dgcs:path <artwork/toggle-background.png> ;
+                dgcs:path <artwork/list-background.png> ;
+            ] ;
+            dgcs:backgroundScenes [
+                a dgcs:Image ;
+                dgcs:path <artwork/list-background-scenes.png> ;
             ] ;
             dgcs:control [
                 a dgcs:Image ;
                 dgcs:path <artwork/param-list.png> ;
-                dgcs:offsetY 15 ;
             ] ;
         ] ;
 
