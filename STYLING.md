@@ -120,14 +120,14 @@ Here is how Ignissor does its dynamic compression metering:
 
 Pretty much everything in the block settings can be stylized, but one notable exception as of KosmOS v1.14 are the peakmeters.
 
-While we allow custom styling, for the sake of consistency and good user experience, we do not allow reposition of certain UI components.  
+While we allow custom styling, for the sake of consistency and good user experience, we do not allow reposition of certain UI components.
 These include everything in the top-bar and non-knobs-aligned parameters.
 
 For parameters we allow them to be reordered, but always within a fixed 6-slot grid in order to align nicely with the physical knobs above it.
 
 ### Examples
 
-We provide an extensive example plugin for block settings' customization [examples/lv2-custom-styling](examples/lv2-custom-styling).  
+We provide an extensive example plugin for block settings' customization [here](examples/lv2-custom-styling).  
 It's somewhat ugly but on purpose, as it is mostly for show-casing and testing all the possible image replacements supported so far.
 
 When deployed to an Anagram, its block settings will look like this:
