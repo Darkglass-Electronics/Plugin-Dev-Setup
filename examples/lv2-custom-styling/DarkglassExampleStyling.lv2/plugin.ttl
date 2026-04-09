@@ -9,7 +9,7 @@
 @prefix unit:  <http://lv2plug.in/ns/extensions/units#> .
 
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling>
-    a lv2:FilterPlugin, lv2:Plugin, doap:Project ;
+    a lv2:UtilityPlugin, lv2:Plugin, doap:Project ;
 
     lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
 
