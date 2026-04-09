@@ -53,9 +53,9 @@ WORKDIR /root
 RUN git clone https://github.com/moddevices/mod-plugin-builder --depth=1
 
 # bootstrap mod-plugin-builder target
-RUN if [[ "${debug}" == "true" ]]; then export debug_suffix="-debug"; fi
-RUN sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config
-RUN ./mod-plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target} && \
+RUN if [ "${debug}" = "true" ]; then debug_suffix="-debug"; else debug_suffix=""; fi && \
+    sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config && \
+    ./mod-plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target} && \
     ./mod-plugin-builder/.clean-install.sh darkglass-anagram${debug_suffix} && \
     rm -f ~/mod-workdir/*/..config.tmp && \
     rm -f ~/mod-workdir/*/.br2* && \
@@ -65,10 +65,8 @@ RUN ./mod-plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target}
     rm -rf ~/mod-workdir/*/build && \
     rm -rf ~/mod-workdir/*/images && \
     rm -rf ~/mod-workdir/*/plugins && \
-    rm -rf ~/mod-workdir/download
-
-# setup environment for building
-RUN echo "source /root/mod-plugin-builder/local.env darkglass-anagram${debug_suffix}" >> /root/.bashrc
+    rm -rf ~/mod-workdir/download && \
+    echo "source /root/mod-plugin-builder/local.env darkglass-anagram${debug_suffix}" >> /root/.bashrc
 
 # CMD
 CMD ["bash"]
