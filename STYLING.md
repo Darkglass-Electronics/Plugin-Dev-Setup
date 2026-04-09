@@ -2,8 +2,6 @@
 
 This repository contains documentation and examples related to developing audio plugins for [Darkglass Anagram](https://www.darkglass.com/products/anagram/) as a platform.
 
-NOTE: This document is a WORK IN PROGRESS! Please bare with us while we set up all the documentation, examples and tools.
-
 NOTE: Custom block image and settings styling as mentioned in this document requires KosmOS >= v1.14.
 
 ## Styling
@@ -130,7 +128,7 @@ For parameters we allow them to be reordered, but always within a fixed 6-slot g
 ### Examples
 
 We provide an extensive example plugin for block settings' customization [examples/lv2-custom-styling](examples/lv2-custom-styling).  
-Its somewhat ugly but on purpose, as it is mostly for show-casing and testing all the possible image replacements supported so far.
+It's somewhat ugly but on purpose, as it is mostly for show-casing and testing all the possible image replacements supported so far.
 
 When deployed to an Anagram, its block settings will look like this:
 
