@@ -3,4 +3,5 @@ build-anagram/
 mod-plugin-builder/
 target/
 /lv2/
+.DS_Store
 Cargo.lock
