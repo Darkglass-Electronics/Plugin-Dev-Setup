@@ -21,11 +21,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # enable arm64
 RUN dpkg --add-architecture arm64
 
-# update and upgrade system
-RUN apt-get update -qq && apt-get upgrade -qqy && apt-get clean
-
-# install packages for buildroot
-RUN apt-get install -qqy qemu-user-static && \
+# update and upgrade system and install packages for buildroot
+RUN apt-get update -qq && apt-get upgrade -qqy && \
+    apt-get install -qqy qemu-user-static && \
     apt-get install -qqy libc6:arm64 libstdc++6:arm64 zlib1g:arm64 && \
     apt-get install -qqy locales acl bash bash-completion bc curl cvs git mercurial rsync subversion sudo wget dosfstools && \
     apt-get install -qqy bison bundler bzip2 cpio flex gawk gperf gzip help2man nano perl patch tar texinfo unzip && \
@@ -35,18 +33,18 @@ RUN apt-get install -qqy qemu-user-static && \
     apt-get clean
 
 # install packages for plugin validation
-RUN apt-get install -qqy lv2-dev sordi && \
+RUN apt-get update -qq && apt-get install -qqy lv2-dev sordi && \
     apt-get clean
 
 # misc stuff
-RUN locale-gen en_US.UTF-8
-RUN echo "source /etc/bash_completion" >> /root/.bashrc
+RUN locale-gen en_US.UTF-8 && \
+    echo "source /etc/bash_completion" >> /root/.bashrc
 
 # rust support
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --no-modify-path --profile minimal
-RUN ~/.cargo/bin/rustup install nightly
-RUN ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu
-RUN ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu --toolchain nightly
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --no-modify-path --profile minimal && \
+    ~/.cargo/bin/rustup install nightly && \
+    ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu && \
+    ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu --toolchain nightly
 
 # checkout mod-plugin-builder
 WORKDIR /root
