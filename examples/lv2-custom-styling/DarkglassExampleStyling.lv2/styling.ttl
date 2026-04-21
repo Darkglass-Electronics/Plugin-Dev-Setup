@@ -11,6 +11,15 @@
     dgcs:blockSettings [
         a dgcs:BlockSettings ;
 
+        # The about page background image
+        # Can contain multiple horizontal frames for paginated scrolling,
+        # in which case it must be a multiple of the screen width
+        # (on Anagram this is 1424px)
+        dgcs:about [
+            a dgcs:Image ;
+            dgcs:path <artwork/about-page.png> ;
+        ] ;
+
         # The bottom-most background image
         # Can contain multiple horizontal frames for paginated scrolling,
         # in which case it must be a multiple of the screen width
