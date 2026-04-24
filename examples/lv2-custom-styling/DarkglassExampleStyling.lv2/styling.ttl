@@ -11,6 +11,13 @@
     dgcs:blockSettings [
         a dgcs:BlockSettings ;
 
+        # The about page background image
+        # There are no strict restrictions on size, it will be scrollable if necessary.
+        dgcs:about [
+            a dgcs:Image ;
+            dgcs:path <artwork/about-page.png> ;
+        ] ;
+
         # The bottom-most background image
         # Can contain multiple horizontal frames for paginated scrolling,
         # in which case it must be a multiple of the screen width
