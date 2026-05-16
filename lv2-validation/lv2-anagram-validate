@@ -14,14 +14,10 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 
-# TODO other tasks
+# WIP
 # - require enabled/bypass for all plugins
 # - require block image for all plugins
 # - require abbreviation for all plugins
-# - if custom-styling block image is provided, verify types
-# - if custom-styling block settings is provided, verify types
-# - verify data and ranges for custom-styling
-# - call into lv2/sord_validate to deal with ttl syntax errors
 # - create a lv2lint-like minimal host that verifies that:
 # -- we can dlopen the binary
 # -- opening, closing and reopening the binary does not crash
@@ -29,11 +25,19 @@
 # -- if plugin is free (from ttl), licensing API matches it in the extension_data
 # - if lv2lint-like test passes, run it through valgrind too?
 
+# TODO other tasks
+# - if custom-styling block image is provided, verify types
+# - if custom-styling block settings is provided, verify types
+# - verify data and ranges for custom-styling
+# - call into lv2/sord_validate to deal with ttl syntax errors
+
 # ------------------------------------------------------------------------------------------------------------
 # Imports
 
 import os
 import sys
+import subprocess
+import glob
 
 import lilv
 
@@ -42,6 +46,7 @@ import lilv
 
 PREFIX_LV2CORE  = "http://lv2plug.in/ns/lv2core#"
 PREFIX_MOD      = "http://moddevices.com/ns/mod#"
+PREFIX_DG       = "http://www.darkglass.com/lv2/ns#"
 
 # ------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -61,6 +66,33 @@ class NS():
         if attr not in self._cache:
             self._cache[attr] = self.world.new_uri(self.base + attr)
         return self._cache[attr]
+
+
+# TODO find reliable way to find path to needed LV2 extensions
+def validate_plugin_ttl_with_sord(plugin_bundle_path, lv2_path="/root/mod-workdir/darkglass-anagram/target/usr/lib/lv2"):
+
+    # collect extension TTLs
+    spec_ttls = glob.glob(os.path.join(lv2_path, "**/*.ttl"), recursive=True)
+
+    # collect plugin TTLs
+    plugin_ttls = glob.glob(os.path.join(plugin_bundle_path, "*.ttl"))
+
+    result = subprocess.run(
+        ["sord_validate"] + spec_ttls + plugin_ttls,
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        print("Validation errors:")
+        if result.stderr:
+            print(result.stderr)
+        if result.stdout:
+            print(result.stdout)
+    else:
+        print("Valid!")
+
+    return result.returncode == 0
 
 def is_integer(string):
     return string.strip().lstrip("-+").isdigit()
@@ -266,6 +298,7 @@ def get_plugin_info(world, plugin):
     ns_pset    = NS(world, "http://lv2plug.in/ns/ext/presets#")
     ns_units   = NS(world, "http://lv2plug.in/ns/extensions/units#")
     ns_mod     = NS(world, PREFIX_MOD)
+    ns_dg      = NS(world, PREFIX_DG)
 
     bundleuri = plugin.get_bundle_uri()
     bundle    = bundleuri.get_path()
@@ -340,9 +373,51 @@ def get_plugin_info(world, plugin):
         errors.append("plugin author name is missing")
 
     # --------------------------------------------------------------------------------------------------------
+    # Darkglass metadata
+
+    dgabbreviation = first_or(plugin.get_value(ns_dg.abbreviation), None)
+    if dgabbreviation is None:
+        errors.append("plugin dg:abbreviation is missing")
+
+    blockimageon = first_or(plugin.get_value(ns_dg.blockImageOn), None)
+    blockimageoff = first_or(plugin.get_value(ns_dg.blockImageOff), None)
+
+    if blockimageon is None and blockimageoff is None:
+        errors.append("plugin is missing block images")
+    else:
+        if blockimageon is None:
+            errors.append("plugin is missing blockImageOn")
+        if blockimageoff is None:
+            errors.append("plugin is missing blockImageOff")
+
+    # --------------------------------------------------------------------------------------------------------
+    # commercial
+
+    commercial_uris = {
+        "http://moddevices.com/ns/ext/license#interface": None,
+    }
+
+    requiredfeatures = [f for f in plugin.get_required_features()]
+    iscommercial = "http://moddevices.com/ns/ext/license#feature" in requiredfeatures
+
+    for curi in commercial_uris:
+        node = world.new_uri(curi)
+        commercial_uris[curi] = plugin.has_extension_data(node)
+
+    if iscommercial:
+        missing = [curi for curi, found in commercial_uris.items() if not found]
+        if missing:
+            errors.append("commercial plugin is missing extension data: %s" % ", ".join(missing))
+    else:
+        unexpected = [curi for curi, found in commercial_uris.items() if found]
+        if unexpected:
+            errors.append("free plugin has unexpected commercial extension data: %s" % ", ".join(unexpected))
+
+    # --------------------------------------------------------------------------------------------------------
     # ports
 
     index = 0
+    destenabledfound = False
     ports = {
         'audio'  : { 'input': [], 'output': [] },
         'control': { 'input': [], 'output': [] },
@@ -354,6 +429,7 @@ def get_plugin_info(world, plugin):
 
     # function for filling port info
     def fill_port_info(port):
+        nonlocal destenabledfound
         # base data
         portname = str_or(port.get_name())
 
@@ -426,6 +502,10 @@ def get_plugin_info(world, plugin):
 
         # control and cv must contain ranges, might contain scale points
         if "Control" in types or "CV" in types:
+
+            if designation == (PREFIX_LV2CORE + "enabled"):
+                destenabledfound = True
+
             isInteger = "integer" in properties
 
             if isInteger and "CV" in types:
@@ -664,6 +744,9 @@ def get_plugin_info(world, plugin):
                 ports[typ] = { 'input': [], 'output': [] }
             ports[typ]["input" if isInput else "output"].append(info)
 
+    if destenabledfound is False:
+        errors.append(f"enabled/disabled not handled: designation '{PREFIX_LV2CORE}enabled' not found")
+
     # --------------------------------------------------------------------------------------------------------
     # presets
 
@@ -725,6 +808,8 @@ def get_plugins_info(bundles):
 
     else:
         for bundle in bundles:
+            validate_plugin_ttl_with_sord(bundle)
+
             # lilv wants the last character as the separator
             bundle = os.path.abspath(bundle)
             if not bundle.endswith(os.sep):
@@ -751,7 +836,7 @@ def get_plugins_info(bundles):
 
 # ------------------------------------------------------------------------------------------------------------
 
-def usage(exit_code):
+def usage(exit_code=1):
     print(f'Usage: {sys.argv[0]} [/path/to/lv2/bundle] <extra-options>')
     print()
     print('Extra options:')
@@ -784,6 +869,10 @@ def main():
             usage()
             sys.exit(1)
         else:
+            if not os.path.isdir(arg):
+                usage()
+                sys.exit(1)
+
             bundles.append(arg)
 
     for i in get_plugins_info(bundles):
