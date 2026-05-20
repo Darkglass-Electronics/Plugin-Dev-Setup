@@ -918,9 +918,6 @@ def get_plugins_info(bundles):
     if len(plugins) == 0:
         return []
 
-    for plugin in plugins:
-        validate_plugin_binay(world, plugin)
-
     def conv(plugin):
         return get_plugin_info(world, plugin)
 
