@@ -109,7 +109,7 @@ def validate_plugin_binay(world, plugin):
             "--show-leak-kinds=definite,indirect",
         ]
         runcomand = valgrindcmd + runcomand
-    elif pluginformat == "aarch64" and shutil.which("qemu-aarch64-static"):
+    elif pluginformat == "aarch64" and shutil.which("qemu-aarch64"):
         qemuCmd = [
             "qemu-aarch64",
             "-L",
