@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 # Copyright (C) 2015-2026 MOD Audio Ltd
 # Copyright (C) 2026 Filipe Coelho <falktx@darkglass.com>
@@ -34,6 +35,9 @@
 # ------------------------------------------------------------------------------------------------------------
 # Imports
 
+from pathlib import Path
+from urllib.parse import urlparse
+import shutil
 import os
 import sys
 import subprocess
@@ -68,8 +72,94 @@ class NS():
         return self._cache[attr]
 
 
-# TODO find reliable way to find path to needed LV2 extensions
-def validate_plugin_ttl_with_sord(plugin_bundle_path, lv2_path="/root/mod-workdir/darkglass-anagram/target/usr/lib/lv2"):
+def validate_plugin_binay(world, plugin):
+    scriptdir = Path(__file__).parent.resolve()
+
+    hostcandidates = list(scriptdir.glob("lv2-anagram-probe/**/lv2-anagram-probe"))
+    if not hostcandidates:
+        print("No binary found, did you build?")
+        sys.exit(1)
+    lv2host = hostcandidates[0]
+
+    lib_uri = plugin.get_library_uri()
+    lib_path = Path(urlparse(str(lib_uri)).path)
+    plugin_uri = str(plugin.get_uri())
+
+    def get_binary_format(path):
+        file_result = subprocess.run(["file", path], capture_output=True, text=True)
+        if "x86" in file_result.stdout:
+            return "x86"
+        elif "aarch64" in file_result.stdout:
+            return "aarch64"
+        else:
+            return None
+
+    bundle_uri = plugin.get_bundle_uri()
+    bundle_path = Path(urlparse(str(bundle_uri)).path)
+
+    runcomand = [lv2host, f"{bundle_path}/", plugin_uri]
+    pluginformat = get_binary_format(str(lib_path))
+    hostformat = get_binary_format(lv2host)
+
+    if pluginformat == "x86" and shutil.which("valgrind"):
+        valgrindcmd = [
+            "valgrind",
+            "--error-exitcode=1",
+            "--leak-check=full",
+            "--show-leak-kinds=definite,indirect",
+        ]
+        runcomand = valgrindcmd + runcomand
+    elif pluginformat == "aarch64" and shutil.which("qemu-aarch64-static"):
+        qemuCmd = [
+            "qemu-aarch64",
+            "-L",
+            "/root/mod-workdir/darkglass-anagram/target/usr/", # TODO path
+        ]
+        runcomand = qemuCmd + runcomand
+
+    if hostformat != pluginformat:
+        print("lv2 host format and plugin don't match, skip verificiation")
+        return True
+
+    result = subprocess.run(
+        runcomand,
+        capture_output=True,
+        text=True
+    )
+
+    print("result: ", result.stdout)
+
+    return result.returncode == 0
+
+
+def validate_plugin_ttl_with_sord(plugin_bundle_path):
+
+    bashrccontent = subprocess.run(
+        ["cat", f"{Path.home()}/.bashrc"],
+        capture_output=True,
+        text=True
+    )
+
+    anagram_target_dir = "darkglass-anagram"
+    if "darkglass-anagram-debug" in bashrccontent.stdout:
+        anagram_target_dir += "-debug"
+
+    # Find dir for LV2 extentions
+    modworkdir = os.getenv("WORKDIR", f"{Path.home()}/mod-workdir")
+    lv2_path_regex = f"{modworkdir}/{anagram_target_dir}/target/usr/lib/lv2"
+
+    lv2_path = glob.glob(lv2_path_regex)
+
+    print(lv2_path)
+
+    if len(lv2_path) == 0:
+        print("error, could not find LV2 path")
+        sys.exit(1)
+    elif len(lv2_path) > 1:
+        print("error, found multiple LV2 paths")
+        sys.exit(1)
+    else:
+        lv2_path = lv2_path[0]
 
     # collect extension TTLs
     spec_ttls = glob.glob(os.path.join(lv2_path, "**/*.ttl"), recursive=True)
@@ -377,7 +467,7 @@ def get_plugin_info(world, plugin):
 
     dgabbreviation = first_or(plugin.get_value(ns_dg.abbreviation), None)
     if dgabbreviation is None:
-        errors.append("plugin dg:abbreviation is missing")
+        errors.append("plugin abbreviation is missing")
 
     blockimageon = first_or(plugin.get_value(ns_dg.blockImageOn), None)
     blockimageoff = first_or(plugin.get_value(ns_dg.blockImageOff), None)
@@ -827,6 +917,9 @@ def get_plugins_info(bundles):
     # make sure the bundles include something
     if len(plugins) == 0:
         return []
+
+    for plugin in plugins:
+        validate_plugin_binay(world, plugin)
 
     def conv(plugin):
         return get_plugin_info(world, plugin)
