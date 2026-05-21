@@ -48,7 +48,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --
 
 # checkout mod-plugin-builder
 WORKDIR /root
-RUN git clone https://github.com/moddevices/mod-plugin-builder --depth=1
+# RUN git clone https://github.com/moddevices/mod-plugin-builder --depth=1
+RUN git clone --depth=1 --branch add_lilv_python_binding https://github.com/moddevices/mod-plugin-builder
 
 # bootstrap mod-plugin-builder target
 RUN if [ "${debug}" = "true" ]; then debug_suffix="-debug"; else debug_suffix=""; fi && \
