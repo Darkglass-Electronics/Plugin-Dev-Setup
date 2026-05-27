@@ -138,7 +138,6 @@ int main(int argc, char* argv[])
     LV2_Worker_Schedule worker_schedule = { nullptr, worker_schedule_func };
     LV2_Feature worker_feature = { LV2_WORKER__schedule, &worker_schedule };
 
-    // const LV2_Feature* features[] = { &map_feature, &worker_feature, nullptr };
     const LV2_Feature* features[] = { &map_feature, &worker_feature, &options_feature, nullptr };
 
     LilvInstance* instance = lilv_plugin_instantiate(plugin, 48000.0, features);
