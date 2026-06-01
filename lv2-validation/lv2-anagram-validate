@@ -42,6 +42,7 @@ import os
 import sys
 import subprocess
 import glob
+import urllib.parse
 
 import lilv
 
@@ -51,6 +52,14 @@ import lilv
 PREFIX_LV2CORE  = "http://lv2plug.in/ns/lv2core#"
 PREFIX_MOD      = "http://moddevices.com/ns/mod#"
 PREFIX_DG       = "http://www.darkglass.com/lv2/ns#"
+
+generalwarnings = set()
+
+skipbinvalidation = False
+if not shutil.which("tiny-host"):
+    skipbinvalidation = True
+    generalwarnings.add("tiny-host not installed, skipped binary validation on all plugins")
+
 
 # ------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -72,85 +81,100 @@ class NS():
         return self._cache[attr]
 
 
-def validate_plugin_binay(world, plugin):
-    scriptdir = Path(__file__).parent.resolve()
+def validate_plugin_binary(world, plugin, target_dir):
+    bintestresults = {
+        "errors": [],
+        "warnings": [],
+        "pedantic": [],
+    }
 
-    hostcandidates = list(scriptdir.glob("lv2-anagram-probe/**/lv2-anagram-probe"))
-    if not hostcandidates:
-        print("No binary found, did you build?")
-        sys.exit(1)
-    lv2host = hostcandidates[0]
-
-    lib_uri = plugin.get_library_uri()
-    lib_path = Path(urlparse(str(lib_uri)).path)
+    lib_path = Path(urlparse(str(plugin.get_library_uri())).path)
+    bundle_path = Path(urlparse(str(plugin.get_bundle_uri())).path)
     plugin_uri = str(plugin.get_uri())
 
+    def is_pablito():
+        try:
+            with open("/proc/device-tree/model") as f:
+                return "Pablito" in f.read()
+        except OSError:
+            return False
+
     def get_binary_format(path):
-        file_result = subprocess.run(["file", path], capture_output=True, text=True)
-        if "x86" in file_result.stdout:
-            return "x86"
-        elif "aarch64" in file_result.stdout:
+        if is_pablito():
             return "aarch64"
-        else:
-            return None
+        out = subprocess.run(["file", str(path)], capture_output=True, text=True).stdout
+        if "x86" in out:
+            return "x86"
+        if "aarch64" in out:
+            return "aarch64"
+        return None
 
-    bundle_uri = plugin.get_bundle_uri()
-    bundle_path = Path(urlparse(str(bundle_uri)).path)
+    plugin_format = get_binary_format(lib_path)
+    host_format   = get_binary_format("/usr/bin/tiny-host")
 
-    runcomand = [lv2host, f"{bundle_path}/", plugin_uri]
-    pluginformat = get_binary_format(str(lib_path))
-    hostformat = get_binary_format(lv2host)
+    runcommand = ["tiny-host", f"{bundle_path}/", plugin_uri]
+    using_valgrind = False
 
-    if pluginformat == "x86" and shutil.which("valgrind"):
-        valgrindcmd = [
-            "valgrind",
-            "--error-exitcode=1",
-            "--leak-check=full",
-            "--show-leak-kinds=definite,indirect",
-        ]
-        runcomand = valgrindcmd + runcomand
-    elif pluginformat == "aarch64" and shutil.which("qemu-aarch64"):
-        qemuCmd = [
-            "qemu-aarch64",
-            "-L",
-            "/root/mod-workdir/darkglass-anagram/target/usr/", # TODO path
-        ]
-        runcomand = qemuCmd + runcomand
+    if plugin_format == host_format:
+        if shutil.which("valgrind"):
+            runcommand = [
+                "valgrind",
+                "--error-exitcode=99", #Use specific exitcode for valgrind errors
+                "--leak-check=full",
+                "--show-leak-kinds=definite,indirect",
+            ] + runcommand
+            using_valgrind = True
+    elif plugin_format == "aarch64" and shutil.which("qemu-aarch64"):
+        runcommand = ["qemu-aarch64", "-L", f"{target_dir}/target/usr/"] + runcommand
+    else:
+        bintestresults["warnings"].append(f"cannot validate: plugin is {plugin_format}, host is {host_format}, no emulator available")
+        return bintestresults
 
-    if hostformat != pluginformat:
-        print("lv2 host format and plugin don't match, skip verificiation")
-        return True
+    result = subprocess.run(runcommand, capture_output=True, text=True)
 
-    result = subprocess.run(
-        runcomand,
-        capture_output=True,
-        text=True
-    )
+    def hash_uri(s: str):
+        h = 0xcbf29ce484222325
+        for c in s.encode("utf-8"):
+            h ^= c
+            h = (h * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF
+        return f"{h:016x}"
 
-    print("result: ", result.stdout)
+    def parse_result(result_type):
+        resultsfile = Path(f"/tmp/{hash_uri(plugin_uri)}_tinyhost_testresult_{result_type}.txt")
+        file_notes = ""
+        if resultsfile.exists():
+            try:
+                file_notes = resultsfile.read_text().strip()
+            finally:
+                resultsfile.unlink(missing_ok=True)
+        return file_notes
 
-    return result.returncode == 0
+    err_msg = parse_result("err")
+    warn_msg = parse_result("warn")
+    pedan_msg = parse_result("pedantic")
 
+    rc = result.returncode
+    if rc == 99:
+        bintestresults["errors"].append(f"valgrind detected memory issues while running plugin in tiny-host:\n{result.stderr or result.stdout}\n")
+    elif rc >= 128:
+        sig = rc - 128
+        bintestresults["errors"].append(f"tiny-host was killed by signal {sig} (likely crashed inside plugin code)")
+    elif rc != 0:
+        bintestresults["errors"].append(f"tiny-host exited with code {rc}:\n{result.stderr or result.stdout}\n")
 
-def validate_plugin_ttl_with_sord(plugin_bundle_path):
+    if err_msg:
+        bintestresults["errors"].append(err_msg)
+    if warn_msg:
+        bintestresults["warnings"].append(warn_msg)
+    if pedan_msg:
+        bintestresults["pedantic"].append(pedan_msg)
 
-    bashrccontent = subprocess.run(
-        ["cat", f"{Path.home()}/.bashrc"],
-        capture_output=True,
-        text=True
-    )
+    return bintestresults
 
-    anagram_target_dir = "darkglass-anagram"
-    if "darkglass-anagram-debug" in bashrccontent.stdout:
-        anagram_target_dir += "-debug"
+def validate_plugin_ttl_with_sord(plugin_bundle_path, target_dir):
 
-    # Find dir for LV2 extentions
-    modworkdir = os.getenv("WORKDIR", f"{Path.home()}/mod-workdir")
-    lv2_path_regex = f"{modworkdir}/{anagram_target_dir}/target/usr/lib/lv2"
-
+    lv2_path_regex = f"{target_dir}/target/usr/lib/lv2"
     lv2_path = glob.glob(lv2_path_regex)
-
-    print(lv2_path)
 
     if len(lv2_path) == 0:
         print("error, could not find LV2 path")
@@ -173,16 +197,9 @@ def validate_plugin_ttl_with_sord(plugin_bundle_path):
         text=True
     )
 
-    if result.returncode != 0:
-        print("Validation errors:")
-        if result.stderr:
-            print(result.stderr)
-        if result.stdout:
-            print(result.stdout)
-    else:
-        print("Valid!")
-
-    return result.returncode == 0
+    output = (result.stderr or "") + (result.stdout or "")
+    output = output.strip()
+    return output or None
 
 def is_integer(string):
     return string.strip().lstrip("-+").isdigit()
@@ -377,7 +394,7 @@ def get_bundle_dirname(bundleuri):
 
 # Get info from a lilv plugin
 # This is used in get_plugins_info below and MOD-SDK
-def get_plugin_info(world, plugin):
+def get_plugin_info(world, plugin, target_dir):
     # define the needed stuff
     ns_rdf     = NS(world, lilv.LILV_NS_RDF)
     ns_rdfs    = NS(world, lilv.LILV_NS_RDFS)
@@ -397,6 +414,16 @@ def get_plugin_info(world, plugin):
     errors   = []
     warnings = []
     pedantic = []
+
+    if not skipbinvalidation:
+        binresult = validate_plugin_binary(world, plugin, target_dir)
+        if binresult is not None:
+            if binresult.get("errors"):
+                errors += binresult["errors"]
+            if binresult.get("warnings"):
+                warnings += binresult["warnings"]
+            if binresult.get("pedantic"):
+                pedantic += binresult["pedantic"]
 
     # --------------------------------------------------------------------------------------------------------
     # uri
@@ -870,9 +897,7 @@ def get_plugin_info(world, plugin):
     return {
         'uri' : uri,
         'name': name,
-
         'binary' : binary,
-
         'errors'  : sorted(errors),
         'warnings': sorted(warnings),
         'pedantic': sorted(pedantic),
@@ -887,41 +912,60 @@ def get_plugins_info(bundles):
     # Create our own unique lilv world
     # We'll load the selected bundles and get all plugins from it
     world = lilv.World()
-
     # this is needed when loading specific bundles instead of load_all
     world.load_specifications()
     world.load_plugin_classes()
 
+    # Check if we are running in docker DEBUG image
+    bashrccontent = subprocess.run(
+        ["cat", f"{Path.home()}/.bashrc"],
+        capture_output=True,
+        text=True,
+    )
+    anagram_target_dir = "darkglass-anagram"
+    if "darkglass-anagram-debug" in bashrccontent.stdout:
+        anagram_target_dir += "-debug"
+
+    # Find dir for LV2 extensions
+    modworkdir = os.getenv("WORKDIR", f"{Path.home()}/mod-workdir")
+    target_dir = f"{modworkdir}/{anagram_target_dir}"
+
+    sord_notes_by_bundle = {}
+
     # load all bundles
     if len(bundles) == 0:
         world.load_all()
-
     else:
         for bundle in bundles:
-            validate_plugin_ttl_with_sord(bundle)
+            notes = validate_plugin_ttl_with_sord(bundle, target_dir)
+            bundle_abs = os.path.abspath(bundle).rstrip(os.sep)
+            sord_notes_by_bundle[bundle_abs] = notes
 
             # lilv wants the last character as the separator
-            bundle = os.path.abspath(bundle)
-            if not bundle.endswith(os.sep):
-                bundle += os.sep
-
+            bundle_for_lilv = bundle_abs + os.sep
             # convert bundle string into a lilv node
-            bundlenode = world.new_file_uri(None, bundle)
-
+            bundlenode = world.new_file_uri(None, bundle_for_lilv)
             # load the bundle
             world.load_bundle(bundlenode)
 
     # get all plugins available in the selected bundles
     plugins = world.get_all_plugins()
-
-    # make sure the bundles include something
     if len(plugins) == 0:
         return []
 
     def conv(plugin):
-        return get_plugin_info(world, plugin)
+        entry = get_plugin_info(world, plugin, target_dir)
 
-    # return all the info
+        # map this plugin back to its bundle, to be able to add sord's notes
+        bundle_uri = str(plugin.get_bundle_uri())
+        bundle_path = urllib.parse.urlparse(bundle_uri).path.rstrip(os.sep)
+
+        notes = sord_notes_by_bundle.get(bundle_path)
+        if notes:
+            entry['sord_validate_notes'] = notes
+
+        return entry
+
     return iter_compat(plugins, conv)
 
 # ------------------------------------------------------------------------------------------------------------
@@ -996,6 +1040,13 @@ def main():
                     print(f'  - {msg}')
 
         print()
+
+    if generalwarnings:
+        print('General warnings:')
+        for msg in generalwarnings:
+            print(f'  - {msg}')
+
+    print()
 
 # ------------------------------------------------------------------------------------------------------------
 
