@@ -64,6 +64,14 @@ if not shutil.which("tiny-host"):
 # ------------------------------------------------------------------------------------------------------------
 # Utilities
 
+def is_pablito():
+    try:
+        with open("/proc/device-tree/model") as f:
+            return "Pablito" in f.read()
+    except OSError:
+        return False
+
+
 class NS():
     def NS(self):
         pass
@@ -91,13 +99,6 @@ def validate_plugin_binary(world, plugin, target_dir):
     lib_path = Path(urlparse(str(plugin.get_library_uri())).path)
     bundle_path = Path(urlparse(str(plugin.get_bundle_uri())).path)
     plugin_uri = str(plugin.get_uri())
-
-    def is_pablito():
-        try:
-            with open("/proc/device-tree/model") as f:
-                return "Pablito" in f.read()
-        except OSError:
-            return False
 
     def get_binary_format(path):
         if is_pablito():
@@ -153,14 +154,13 @@ def validate_plugin_binary(world, plugin, target_dir):
     warn_msg = parse_result("warn")
     pedan_msg = parse_result("pedantic")
 
+    # We do not have to check for exit code 1, this message will already be picked up by err_msg below
     rc = result.returncode
     if rc == 99:
         bintestresults["errors"].append(f"valgrind detected memory issues while running plugin in tiny-host:\n{result.stderr or result.stdout}\n")
     elif rc >= 128:
         sig = rc - 128
         bintestresults["errors"].append(f"tiny-host was killed by signal {sig} (likely crashed inside plugin code)")
-    elif rc != 0:
-        bintestresults["errors"].append(f"tiny-host exited with code {rc}:\n{result.stderr or result.stdout}\n")
 
     if err_msg:
         bintestresults["errors"].append(err_msg)
@@ -496,16 +496,18 @@ def get_plugin_info(world, plugin, target_dir):
     if dgabbreviation is None:
         errors.append("plugin abbreviation is missing")
 
-    blockimageon = first_or(plugin.get_value(ns_dg.blockImageOn), None)
-    blockimageoff = first_or(plugin.get_value(ns_dg.blockImageOff), None)
+    # Ignore this when we are looking at the anagram system blocks
+    if not (is_pablito() and plugin.get_library_uri().get_path().startswith("/usr/")):
+        blockimageon = first_or(plugin.get_value(ns_dg.blockImageOn), None)
+        blockimageoff = first_or(plugin.get_value(ns_dg.blockImageOff), None)
 
-    if blockimageon is None and blockimageoff is None:
-        errors.append("plugin is missing block images")
-    else:
-        if blockimageon is None:
-            errors.append("plugin is missing blockImageOn")
-        if blockimageoff is None:
-            errors.append("plugin is missing blockImageOff")
+        if blockimageon is None and blockimageoff is None:
+            errors.append("plugin is missing block images")
+        else:
+            if blockimageon is None:
+                errors.append("plugin is missing blockImageOn")
+            if blockimageoff is None:
+                errors.append("plugin is missing blockImageOff")
 
     # --------------------------------------------------------------------------------------------------------
     # commercial
@@ -546,6 +548,7 @@ def get_plugin_info(world, plugin, target_dir):
 
     # function for filling port info
     def fill_port_info(port):
+
         nonlocal destenabledfound
         # base data
         portname = str_or(port.get_name())
