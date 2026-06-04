@@ -134,17 +134,41 @@ int main(int argc, char* argv[])
 
     LV2_URID_Map map = { nullptr, mapfn };
 
+    // TODO, are any of these actually not supported on Anagram? If so maybe best to remove it
     LV2_Feature map_feature = {
         LV2_URID__map,
         &map
     };
-
     LV2_Feature bounded_block_length_feature = {
         LV2_BUF_SIZE__boundedBlockLength, nullptr
     };
-
+    LV2_Feature coarsed_block_length_feature = {
+        LV2_BUF_SIZE__coarseBlockLength, nullptr
+    };
+    LV2_Feature fixed_block_length_feature = {
+        LV2_BUF_SIZE__fixedBlockLength, nullptr
+    };
+    LV2_Feature max_block_length_feature = {
+        LV2_BUF_SIZE__maxBlockLength, nullptr
+    };
+    LV2_Feature min_block_length_feature = {
+        LV2_BUF_SIZE__minBlockLength, nullptr
+    };
+    LV2_Feature nominal_block_length_feature = {
+        LV2_BUF_SIZE__nominalBlockLength, nullptr
+    };
+    LV2_Feature powerof2_block_length_feature = {
+        LV2_BUF_SIZE__powerOf2BlockLength, nullptr
+    };
+    LV2_Feature sequenceSize_block_length_feature = {
+        LV2_BUF_SIZE__sequenceSize, nullptr
+    };
     LV2_Feature license_feature = {
         "http://moddevices.com/ns/ext/license#feature", nullptr
+    };
+
+    LV2_Feature in_place_broken_feature = {
+        LV2_CORE__inPlaceBroken, nullptr
     };
 
     LV2_Worker_Schedule worker_schedule = { nullptr, worker_schedule_func };
@@ -155,6 +179,14 @@ int main(int argc, char* argv[])
         &worker_feature,
         &options_feature,
         &bounded_block_length_feature,
+        &coarsed_block_length_feature,
+        &fixed_block_length_feature,
+        &max_block_length_feature,
+        &min_block_length_feature,
+        &nominal_block_length_feature,
+        &powerof2_block_length_feature,
+        &sequenceSize_block_length_feature,
+        &in_place_broken_feature,
         &license_feature,
         nullptr
     };
