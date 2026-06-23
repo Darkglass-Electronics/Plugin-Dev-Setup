@@ -18,9 +18,9 @@ jobs:
     container:
       image: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/mod-workdir
@@ -44,7 +44,7 @@ jobs:
       - name: Pack bootstrap
         run: |
           tar -C ~/mod-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}/host ${{ matrix.platform }}/target generic-aarch64/toolchain
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_FILENAME }}
           path: ${{ env.ARTIFACT_FILENAME }}.tar.gz
@@ -59,12 +59,12 @@ jobs:
     container:
       image: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set ARTIFACT_FILENAME
         run: |
           echo "ARTIFACT_FILENAME=$(echo bootstrap-linux-${{ matrix.container }}-${{ matrix.platform }} | sed 's/-darkglass-anagram//' | sed 's/:/-/g')" >> "${GITHUB_ENV}"
       - name: Download bootstrap
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACT_FILENAME }}
           path: ~/mod-workdir
