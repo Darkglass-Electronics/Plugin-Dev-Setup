@@ -10,7 +10,8 @@ jobs:
     strategy:
       matrix:
         debug: [false, true]
-    runs-on: ubuntu-latest
+        runsOn: [ubuntu-26.04, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.runsOn }}
     steps:
       - uses: actions/checkout@v7
       - name: Set DEBUG_SUFFIX
