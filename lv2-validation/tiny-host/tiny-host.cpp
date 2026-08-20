@@ -34,6 +34,12 @@ static std::string hash_uri(const std::string& s) {
     return out.str();
 }
 
+static struct LV2_License_Feature {
+    void* handle = nullptr;
+    char* (*license)() = []() -> char* { return nullptr; };
+    void (*free)() = []{};
+} license_feature_data;
+
 static LV2_URID mapfn(LV2_URID_Map_Handle, const char* const uri)
 {
     if (uri == nullptr || uri[0] == '\0')
@@ -59,9 +65,10 @@ static LV2_URID mapfn(LV2_URID_Map_Handle, const char* const uri)
     return urid;
 }
 
-static const int32_t block_length = 256;
+static constexpr const int32_t block_length = 16;
 
 LV2_URID urid_buf_max  = mapfn(nullptr, LV2_BUF_SIZE__maxBlockLength);
+LV2_URID urid_buf_min  = mapfn(nullptr, LV2_BUF_SIZE__minBlockLength);
 LV2_URID urid_buf_nom  = mapfn(nullptr, LV2_BUF_SIZE__nominalBlockLength);
 LV2_URID urid_atom_int = mapfn(nullptr, LV2_ATOM__Int);
 
@@ -69,6 +76,11 @@ static const LV2_Options_Option options[] = {
     {
         LV2_OPTIONS_INSTANCE, 0,
         urid_buf_max,
+        sizeof(int32_t), urid_atom_int, &block_length
+    },
+    {
+        LV2_OPTIONS_INSTANCE, 0,
+        urid_buf_min,
         sizeof(int32_t), urid_atom_int, &block_length
     },
     {
@@ -163,15 +175,17 @@ int main(int argc, char* argv[])
     LV2_Feature sequenceSize_block_length_feature = {
         LV2_BUF_SIZE__sequenceSize, nullptr
     };
-    LV2_Feature license_feature = {
-        "http://www.darkglass.com/lv2/ns/lv2ext/license#feature", nullptr
-    };
-    LV2_Feature license_feature_old = {
-        "http://moddevices.com/ns/ext/license#feature", nullptr
-    };
-
     LV2_Feature in_place_broken_feature = {
         LV2_CORE__inPlaceBroken, nullptr
+    };
+    LV2_Feature license_feature = {
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#feature", &license_feature_data
+    };
+    LV2_Feature license_feature_old = {
+        "http://moddevices.com/ns/ext/license#feature", &license_feature_data
+    };
+    LV2_Feature noPreRun_feature = {
+        "http://www.darkglass.com/lv2/ns#noPreRun", nullptr
     };
 
     LV2_Worker_Schedule worker_schedule = { nullptr, worker_schedule_func };
@@ -192,6 +206,7 @@ int main(int argc, char* argv[])
         &in_place_broken_feature,
         &license_feature,
         &license_feature_old,
+        &noPreRun_feature,
         nullptr
     };
 
@@ -268,11 +283,20 @@ int main(int argc, char* argv[])
     // Connect ports, so we can see with a tool like valgrind if there is a memory issue here.
     // No per-port validation here, since TTL validity is handled upstream by lv2-anagram-validate script.
     uint32_t num_ports = lilv_plugin_get_num_ports(plugin);
+    LilvNode* audio_class  = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
+    LilvNode* control_class  = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
     LilvNode* input_class = lilv_new_uri(world, LILV_URI_INPUT_PORT);
     LilvNode* atom_class  = lilv_new_uri(world, LV2_ATOM__AtomPort);
     const LV2_URID urid_atom_seq = mapfn(nullptr, LV2_ATOM__Sequence);
 
     std::vector<std::vector<uint8_t>> port_buffers(num_ports);
+    std::vector<float> port_defaults(num_ports);
+    std::vector<float> port_min_max_values(num_ports);
+
+    lilv_plugin_get_port_ranges_float(plugin,
+                                      port_min_max_values.data(),
+                                      port_min_max_values.data(),
+                                      port_defaults.data());
 
     for (uint32_t i = 0; i < num_ports; ++i) {
         const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
@@ -288,20 +312,28 @@ int main(int argc, char* argv[])
             seq->atom.size = is_input ? sizeof(LV2_Atom_Sequence_Body)
                                        : atom_buf_size - sizeof(LV2_Atom);
             if (is_input) { seq->body.unit = 0; seq->body.pad = 0; }
-        } else {
+        } else if (lilv_port_is_a(plugin, port, audio_class)) {
             port_buffers[i].resize(block_length * sizeof(float), 0);
+        } else if (lilv_port_is_a(plugin, port, control_class)) {
+            port_buffers[i].resize(sizeof(float), 0);
+            *reinterpret_cast<float*>(port_buffers[i].data()) = port_defaults[i];
+        } else {
+            lilv_instance_connect_port(instance, i, nullptr);
+            continue;
         }
 
         lilv_instance_connect_port(instance, i, port_buffers[i].data());
     }
 
+    lilv_node_free(audio_class);
+    lilv_node_free(control_class);
     lilv_node_free(input_class);
     lilv_node_free(atom_class);
 
     write_err_msg();
 
     lilv_instance_activate(instance);
-    lilv_instance_run(instance, 256);
+    lilv_instance_run(instance, block_length);
     lilv_instance_deactivate(instance);
 
     cleanup();

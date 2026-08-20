@@ -60,6 +60,24 @@ if not shutil.which("tiny-host"):
     skipbinvalidation = True
     generalwarnings.add("tiny-host not installed, skipped binary validation on all plugins")
 
+skipped_plugins = (
+    # needs a jack client
+    "urn:darkglass-anagram:fxloop",
+    "urn:darkglass-anagram:return",
+    "urn:darkglass-anagram:send",
+    "urn:darkglass-anagram:output",
+    # utility, never used in the chain
+    "http://gareus.org/oss/lv2/modmeter",
+    "http://gareus.org/oss/lv2/modspectre", # FIXME has memory leaks
+    "http://looperlative.com/plugins/lp3-anagram",
+    "urn:darkglass:Tuner",
+    "urn:darkglass-anagram:exp-pedal",
+    "urn:darkglass-anagram:meters",
+    "urn:darkglass-anagram:midi-cc-helper",
+    "urn:darkglass-anagram:midi-pc-gen",
+    "urn:darkglass-anagram:mixer",
+    "urn:darkglass-anagram:sine-gen",
+)
 
 # ------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -948,6 +966,9 @@ def get_plugins_info(bundles):
         return []
 
     def conv(plugin):
+        if str(plugin.get_uri()) in skipped_plugins:
+            return None
+
         entry = get_plugin_info(world, plugin, system_dir)
 
         # map this plugin back to its bundle, to be able to add sord's notes
@@ -1002,6 +1023,8 @@ def main():
             bundles.append(arg)
 
     for i in get_plugins_info(bundles):
+        if i is None:
+            continue
         if not verbose and not i['errors'] and (not warnings or not i['warnings']) and (not pedantic or not i['pedantic']):
             continue
 
@@ -1022,7 +1045,7 @@ def main():
                     print('Warnings:')
                     for msg in i['warnings']:
                         print(f'  - {msg}')
-                else:
+                elif not i['errors']:
                     print('No warnings')
 
         if pedantic:
