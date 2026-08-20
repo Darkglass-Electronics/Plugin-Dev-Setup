@@ -164,6 +164,9 @@ int main(int argc, char* argv[])
         LV2_BUF_SIZE__sequenceSize, nullptr
     };
     LV2_Feature license_feature = {
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#feature", nullptr
+    };
+    LV2_Feature license_feature_old = {
         "http://moddevices.com/ns/ext/license#feature", nullptr
     };
 
@@ -188,6 +191,7 @@ int main(int argc, char* argv[])
         &sequenceSize_block_length_feature,
         &in_place_broken_feature,
         &license_feature,
+        &license_feature_old,
         nullptr
     };
 
@@ -227,21 +231,36 @@ int main(int argc, char* argv[])
     }
 
     // Check if the extension declaration matches between binary and TTL
-    const std::string target = "http://moddevices.com/ns/ext/license#interface";
-    bool inTtl = false;
+    const char* const license_interface = "http://www.darkglass.com/lv2/ns/lv2ext/license#interface";
+    const char* const license_interface_legacy = "http://moddevices.com/ns/ext/license#interface";
+    bool licenseInTtl = false;
+    bool licenseLegacyInTtl = false;
+
     LilvNodes* extensions = lilv_plugin_get_extension_data(plugin);
     LILV_FOREACH(nodes, i, extensions) {
         const LilvNode* ext = lilv_nodes_get(extensions, i);
-        const char* uri = lilv_node_as_uri(ext);
-        if (uri && target == uri) { inTtl = true; break; }
+        if (const char* uri = lilv_node_as_uri(ext)) {
+            if (std::strcmp(uri, license_interface) == 0)
+                licenseInTtl = true;
+            else if (std::strcmp(uri, license_interface_legacy) == 0)
+                licenseLegacyInTtl = true;
+        }
     }
     lilv_nodes_free(extensions);
 
-    const bool inBinary = lilv_instance_get_extension_data(instance, target.c_str()) != nullptr;
-
-    if (inTtl != inBinary) {
-        msg += "Declared extension: " + target + "\n  - ";
-        msg += (inTtl && !inBinary)
+    if (licenseInTtl != !!lilv_instance_get_extension_data(instance, license_interface)) {
+        msg += "Declared extension: ";
+        msg += license_interface;
+        msg += "\n  - ";
+        msg += licenseInTtl
+             ? "In ttl but binary does NOT provide it (mismatch!)\n"
+             : "Binary provides it but ttl does NOT declare it (mismatch!)\n";
+    }
+    if (licenseLegacyInTtl != !!lilv_instance_get_extension_data(instance, license_interface_legacy)) {
+        msg += "Declared extension: ";
+        msg += license_interface_legacy;
+        msg += "\n  - ";
+        msg += licenseLegacyInTtl
              ? "In ttl but binary does NOT provide it (mismatch!)\n"
              : "Binary provides it but ttl does NOT declare it (mismatch!)\n";
     }
