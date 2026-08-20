@@ -89,7 +89,7 @@ class NS():
         return self._cache[attr]
 
 
-def validate_plugin_binary(world, plugin, target_dir):
+def validate_plugin_binary(plugin, target_dir):
     bintestresults = {
         "errors": [],
         "warnings": [],
@@ -114,7 +114,6 @@ def validate_plugin_binary(world, plugin, target_dir):
     host_format   = get_binary_format("/usr/bin/tiny-host")
 
     runcommand = ["tiny-host", f"{bundle_path}/", plugin_uri]
-    using_valgrind = False
 
     if plugin_format == host_format:
         if shutil.which("valgrind"):
@@ -124,7 +123,6 @@ def validate_plugin_binary(world, plugin, target_dir):
                 "--leak-check=full",
                 "--show-leak-kinds=definite,indirect",
             ] + runcommand
-            using_valgrind = True
     elif plugin_format == "aarch64" and shutil.which("qemu-aarch64"):
         runcommand = ["qemu-aarch64", "-L", f"{target_dir}/target/usr/"] + runcommand
     else:
@@ -171,28 +169,34 @@ def validate_plugin_binary(world, plugin, target_dir):
 
     return bintestresults
 
-def validate_plugin_ttl_with_sord(plugin_bundle_path, target_dir):
-
-    lv2_path_regex = f"{target_dir}/target/usr/lib/lv2"
-    lv2_path = glob.glob(lv2_path_regex)
-
-    if len(lv2_path) == 0:
-        print("error, could not find LV2 path")
-        sys.exit(1)
-    elif len(lv2_path) > 1:
-        print("error, found multiple LV2 paths")
-        sys.exit(1)
-    else:
-        lv2_path = lv2_path[0]
+def validate_plugin_ttl_with_sord(plugin_bundle_path, system_dir):
+    lv2_path = f"{system_dir}/usr/lib/lv2"
 
     # collect extension TTLs
-    spec_ttls = glob.glob(os.path.join(lv2_path, "**/*.ttl"), recursive=True)
+    extra_specs = (
+        "dg-meta/*.ttl",
+        "dg-control-port-state-update.lv2/*.ttl",
+        "dg-custom-styling.lv2/*.ttl",
+        "dg-license.lv2/*.ttl",
+        "dg-properties.lv2/*.ttl",
+        "kx-control-input-port-change-request.lv2/*.ttl",
+        "kx-meta/*.ttl",
+        "kx-programs.lv2/*.ttl",
+        "kx-properties.lv2/*.ttl",
+        "mod.lv2/*.ttl",
+        "modgui.lv2/*.ttl",
+        "mod-hmi.lv2/*.ttl",
+        "mod-license.lv2/*.ttl",
+    )
+    extra_spec_ttls = []
+    for extra_spec in extra_specs:
+        extra_spec_ttls += glob.glob(os.path.join(lv2_path, extra_spec))
 
     # collect plugin TTLs
     plugin_ttls = glob.glob(os.path.join(plugin_bundle_path, "*.ttl"))
 
     result = subprocess.run(
-        ["sord_validate"] + spec_ttls + plugin_ttls,
+        ["lv2_validate"] + extra_spec_ttls + plugin_ttls,
         capture_output=True,
         text=True
     )
@@ -416,7 +420,7 @@ def get_plugin_info(world, plugin, target_dir):
     pedantic = []
 
     if not skipbinvalidation:
-        binresult = validate_plugin_binary(world, plugin, target_dir)
+        binresult = validate_plugin_binary(plugin, target_dir)
         if binresult is not None:
             if binresult.get("errors"):
                 errors += binresult["errors"]
@@ -463,23 +467,13 @@ def get_plugin_info(world, plugin, target_dir):
 
     if microver is None and minorver is None:
         errors.append("plugin is missing version information")
-        minorVersion = 0
-        microVersion = 0
 
     else:
         if minorver is None:
             errors.append("plugin is missing minorVersion")
-            minorVersion = 0
-        else:
-            minorVersion = int(minorver)
 
         if microver is None:
             errors.append("plugin is missing microVersion")
-            microVersion = 0
-        else:
-            microVersion = int(microver)
-
-    version = "%d.%d" % (minorVersion, microVersion)
 
     # --------------------------------------------------------------------------------------------------------
     # author
@@ -513,24 +507,28 @@ def get_plugin_info(world, plugin, target_dir):
     # commercial
 
     commercial_uris = {
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#interface": None,
         "http://moddevices.com/ns/ext/license#interface": None,
     }
 
     requiredfeatures = [f for f in plugin.get_required_features()]
-    iscommercial = "http://moddevices.com/ns/ext/license#feature" in requiredfeatures
+    iscommercial = (
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#feature" in requiredfeatures or
+        "http://moddevices.com/ns/ext/license#feature" in requiredfeatures
+    )
 
     for curi in commercial_uris:
         node = world.new_uri(curi)
         commercial_uris[curi] = plugin.has_extension_data(node)
 
     if iscommercial:
-        missing = [curi for curi, found in commercial_uris.items() if not found]
-        if missing:
-            errors.append("commercial plugin is missing extension data: %s" % ", ".join(missing))
+        if not any(curi for curi, found in commercial_uris.items() if found):
+            errors.append("commercial plugin is missing extension data for license interface")
     else:
-        unexpected = [curi for curi, found in commercial_uris.items() if found]
-        if unexpected:
-            errors.append("free plugin has unexpected commercial extension data: %s" % ", ".join(unexpected))
+        for curi, found in commercial_uris.items():
+            if found:
+                errors.append("free plugin has unexpected commercial extension data: "  + curi)
+                break
 
     # --------------------------------------------------------------------------------------------------------
     # ports
@@ -881,26 +879,13 @@ def get_plugin_info(world, plugin, target_dir):
         if not label:
             errors.append("preset with uri '%s' has no label" % (uri or "<unknown>"))
 
-        return (uri, label)
-
-    presets = []
-
-    presets_data = iter_compat(plugin.get_related(ns_pset.Preset), get_preset_data)
-
-    if len(presets_data) != 0:
-        unsorted = dict(p for p in presets_data)
-        uris     = list(unsorted.keys())
-        uris.sort()
-        presets  = list({ 'uri': p, 'label': unsorted[p] } for p in uris)
-        del unsorted, uris
+    iter_compat(plugin.get_related(ns_pset.Preset), get_preset_data)
 
     # --------------------------------------------------------------------------------------------------------
     # done
 
     return {
         'uri' : uri,
-        'name': name,
-        'binary' : binary,
         'errors'  : sorted(errors),
         'warnings': sorted(warnings),
         'pedantic': sorted(pedantic),
@@ -920,18 +905,24 @@ def get_plugins_info(bundles):
     world.load_plugin_classes()
 
     # Check if we are running in docker DEBUG image
-    bashrccontent = subprocess.run(
-        ["cat", f"{Path.home()}/.bashrc"],
-        capture_output=True,
-        text=True,
-    )
-    anagram_target_dir = "darkglass-anagram"
-    if "darkglass-anagram-debug" in bashrccontent.stdout:
-        anagram_target_dir += "-debug"
+    anagram_target_dir = ""
+    bashrcfile = f"{Path.home()}/.bashrc"
+
+    # FIXME improve to support any variant (e.g. gcc15)
+    if os.path.exists(bashrcfile):
+        with open(bashrcfile, 'r') as fh:
+            bashrccontent = fh.read()
+
+        anagram_target_dir = "darkglass-anagram"
+        if "darkglass-anagram-debug" in bashrccontent:
+            anagram_target_dir += "-debug"
 
     # Find dir for LV2 extensions
     modworkdir = os.getenv("WORKDIR", f"{Path.home()}/mod-workdir")
-    target_dir = f"{modworkdir}/{anagram_target_dir}"
+    if os.path.exists(modworkdir):
+        system_dir = f"{modworkdir}/{anagram_target_dir}/target"
+    else:
+        system_dir = ""
 
     sord_notes_by_bundle = {}
 
@@ -940,7 +931,7 @@ def get_plugins_info(bundles):
         world.load_all()
     else:
         for bundle in bundles:
-            notes = validate_plugin_ttl_with_sord(bundle, target_dir)
+            notes = validate_plugin_ttl_with_sord(bundle, system_dir)
             bundle_abs = os.path.abspath(bundle).rstrip(os.sep)
             sord_notes_by_bundle[bundle_abs] = notes
 
@@ -957,7 +948,7 @@ def get_plugins_info(bundles):
         return []
 
     def conv(plugin):
-        entry = get_plugin_info(world, plugin, target_dir)
+        entry = get_plugin_info(world, plugin, system_dir)
 
         # map this plugin back to its bundle, to be able to add sord's notes
         bundle_uri = str(plugin.get_bundle_uri())
@@ -973,20 +964,20 @@ def get_plugins_info(bundles):
 
 # ------------------------------------------------------------------------------------------------------------
 
-def usage(exit_code=1):
+def usage(exit_code):
     print(f'Usage: {sys.argv[0]} [/path/to/lv2/bundle] <extra-options>')
     print()
     print('Extra options:')
     print('  --no-pedantic    Skip pedantic messages')
     print('  --no-warnings    Skip warnings')
     print('  --verbose        Always show all plugins, good ones too')
+    sys.exit(exit_code)
 
 # ------------------------------------------------------------------------------------------------------------
 
 def main():
     if '-h' in sys.argv or '--help' in sys.argv:
-        usage()
-        sys.exit(0)
+        usage(0)
 
     warnings = True
     pedantic = True
@@ -1003,12 +994,10 @@ def main():
         elif '--verbose' in sys.argv:
             verbose = True
         elif arg.startswith('--'):
-            usage()
-            sys.exit(1)
+            usage(1)
         else:
             if not os.path.isdir(arg):
-                usage()
-                sys.exit(1)
+                usage(1)
 
             bundles.append(arg)
 
