@@ -139,7 +139,9 @@ def validate_plugin_binary(plugin, target_dir):
                 "valgrind",
                 "--error-exitcode=99", #Use specific exitcode for valgrind errors
                 "--leak-check=full",
+                "--errors-for-leak-kinds=definite,indirect",
                 "--show-leak-kinds=definite,indirect",
+                "--track-origins=yes",
             ] + runcommand
     elif plugin_format == "aarch64" and shutil.which("qemu-aarch64"):
         runcommand = ["qemu-aarch64", "-L", f"{target_dir}/target/usr/"] + runcommand
@@ -1008,11 +1010,11 @@ def main():
     for arg in sys.argv[1:]:
         if arg == '--':
             break
-        if '--no-pedantic' in sys.argv:
+        elif arg == '--no-pedantic':
             pedantic = False
-        elif '--no-warnings' in sys.argv:
+        elif arg == '--no-warnings':
             warnings = pedantic = False
-        elif '--verbose' in sys.argv:
+        elif arg == '--verbose':
             verbose = True
         elif arg.startswith('--'):
             usage(1)
