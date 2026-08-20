@@ -12,14 +12,14 @@ jobs:
         debug: [false, true]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set DEBUG_SUFFIX
         run: |
           if [ "${{ matrix.debug }}" = "true" ]; then
             echo "DEBUG_SUFFIX=-debug" >> "${GITHUB_ENV}"
           fi
       - name: Set up cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/docker
           key: bootstrap-docker${{ env.DEBUG_SUFFIX }}-v${{ env.CACHE_VERSION }}
@@ -39,7 +39,7 @@ jobs:
             mkdir -p ~/docker
             docker save -o ~/docker/bootstrap-docker${{ env.DEBUG_SUFFIX }}.tar darkglass-anagram${{ env.DEBUG_SUFFIX }}
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bootstrap-docker${{ env.DEBUG_SUFFIX }}
           path: ~/docker/bootstrap-docker${{ env.DEBUG_SUFFIX }}.tar
@@ -51,14 +51,14 @@ jobs:
         debug: [false, true]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set DEBUG_SUFFIX
         run: |
           if [ "${{ matrix.debug }}" = "true" ]; then
             echo "DEBUG_SUFFIX=-debug" >> "${GITHUB_ENV}"
           fi
       - name: Download bootstrap
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bootstrap-docker${{ env.DEBUG_SUFFIX }}
           path: ~/docker
