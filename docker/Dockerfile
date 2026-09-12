@@ -5,11 +5,9 @@ LABEL maintainer="Filipe Coelho <falktx@darkglass.com>"
 ARG debug=false
 
 # optional argument for specifying build target, possible choices:
-# - full (builds everything, toolchain and all libs)
 # - minimal (builds minimal libs only, includes host-cmake, fftw and liblo)
-# - kernel (builds libs needed for the Linux kernel)
 # - toolchain (builds toolchain only, no extra libs or host tools)
-ARG target=full
+ARG target=
 
 # allow to build as root
 ENV CT_ALLOW_BUILD_AS_ROOT_SURE=y
@@ -46,25 +44,25 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --
     ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu && \
     ~/.cargo/bin/rustup target add aarch64-unknown-linux-gnu --toolchain nightly
 
-# checkout mod-plugin-builder
+# checkout plugin-builder
 WORKDIR /root
-RUN git clone https://github.com/moddevices/mod-plugin-builder --depth=1
+RUN git clone https://github.com/Darkglass-Electronics/plugin-builder --depth=1
 
-# bootstrap mod-plugin-builder target
+# bootstrap plugin-builder target
 RUN if [ "${debug}" = "true" ]; then debug_suffix="-debug"; else debug_suffix=""; fi && \
-    sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config && \
-    ./mod-plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target} && \
-    ./mod-plugin-builder/.clean-install.sh darkglass-anagram${debug_suffix} && \
-    rm -f ~/mod-workdir/*/..config.tmp && \
-    rm -f ~/mod-workdir/*/.br2* && \
-    rm -f ~/mod-workdir/*/.config && \
-    rm -f ~/mod-workdir/*/Makefile && \
-    rm -f ~/mod-workdir/*/staging && \
-    rm -rf ~/mod-workdir/*/build && \
-    rm -rf ~/mod-workdir/*/images && \
-    rm -rf ~/mod-workdir/*/plugins && \
-    rm -rf ~/mod-workdir/download && \
-    echo "source /root/mod-plugin-builder/local.env darkglass-anagram${debug_suffix}" >> /root/.bashrc
+    sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' plugin-builder/toolchain/*.config && \
+    ./plugin-builder/bootstrap.sh darkglass-anagram${debug_suffix} ${target} && \
+    ./plugin-builder/.clean-install.sh darkglass-anagram${debug_suffix} && \
+    rm -f ~/darkglass-linux-workdir/*/..config.tmp && \
+    rm -f ~/darkglass-linux-workdir/*/.br2* && \
+    rm -f ~/darkglass-linux-workdir/*/.config && \
+    rm -f ~/darkglass-linux-workdir/*/Makefile && \
+    rm -f ~/darkglass-linux-workdir/*/staging && \
+    rm -rf ~/darkglass-linux-workdir/*/build && \
+    rm -rf ~/darkglass-linux-workdir/*/images && \
+    rm -rf ~/darkglass-linux-workdir/*/plugins && \
+    rm -rf ~/darkglass-linux-workdir/download && \
+    echo "source /root/plugin-builder/local.env darkglass-anagram${debug_suffix}" >> /root/.bashrc
 
 # CMD
 CMD ["bash"]
