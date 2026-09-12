@@ -24,7 +24,6 @@ Assuming you have docker installed, you can build it like this:
 ```sh
 docker buildx build \
     --build-arg debug=false \
-    --build-arg target=full \
     --tag "darkglass-anagram" \
     /path/to/Plugin-Dev-Setup/docker
 ```

@@ -1,6 +1,6 @@
 build/
 build-anagram/
-mod-plugin-builder/
+plugin-builder/
 target/
 /lv2/
 .DS_Store
