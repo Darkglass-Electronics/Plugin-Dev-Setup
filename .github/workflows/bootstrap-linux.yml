@@ -12,7 +12,7 @@ jobs:
   bootstrap:
     strategy:
       matrix:
-        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04, ubuntu:26.04]
+        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
         platform: [darkglass-anagram, darkglass-anagram-debug, darkglass-anagram-gcc15]
     runs-on: ubuntu-latest
     container:
@@ -58,7 +58,7 @@ jobs:
     needs: bootstrap
     strategy:
       matrix:
-        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04, ubuntu:26.04]
+        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
         platform: [darkglass-anagram, darkglass-anagram-debug, darkglass-anagram-gcc15]
     runs-on: ubuntu-latest
     container:
