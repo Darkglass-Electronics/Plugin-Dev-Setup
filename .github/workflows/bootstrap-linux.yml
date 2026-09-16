@@ -3,7 +3,7 @@ name: bootstrap-linux
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 3
+  CACHE_VERSION: 5
   CT_ALLOW_BUILD_AS_ROOT_SURE: 1
   DEBIAN_FRONTEND: noninteractive
   FORCE_UNSAFE_CONFIGURE: 1
@@ -12,8 +12,8 @@ jobs:
   bootstrap:
     strategy:
       matrix:
-        container: [debian:11, debian:12, debian:13, ubuntu:20.04, ubuntu:22.04, ubuntu:24.04]
-        platform: [darkglass-anagram, darkglass-anagram-debug]
+        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
+        platform: [darkglass-anagram, darkglass-anagram-debug, darkglass-anagram-gcc15]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            ~/mod-workdir
+            ~/darkglass-linux-workdir
           key: bootstrap-linux-${{ matrix.platform }}-${{ matrix.container }}-v${{ env.CACHE_VERSION }}
       - name: Install dependencies
         run: |
@@ -31,19 +31,24 @@ jobs:
             acl bc curl cvs git mercurial rsync subversion wget \
             bison bzip2 flex gawk gperf gzip help2man nano perl patch tar texinfo unzip \
             automake binutils build-essential cpio libtool libncurses-dev pkg-config python-is-python3 libtool-bin
-      - name: Clone mod-plugin-builder
+      - name: Clone plugin-builder
         run: |
-          git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
+          git clone https://github.com/Darkglass-Electronics/plugin-builder --depth=1
       - name: Bootstrap toolchain
         run: |
-          sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' mod-plugin-builder/toolchain/generic-aarch64.config
-          ./mod-plugin-builder/bootstrap.sh ${{ matrix.platform }} && ./mod-plugin-builder/.clean-install.sh ${{ matrix.platform }}
+          sed -i 's/CT_LOG_PROGRESS_BAR=y/CT_LOG_PROGRESS_BAR=n/' plugin-builder/toolchain/*.config
+          ./plugin-builder/bootstrap.sh ${{ matrix.platform }} && ./plugin-builder/.clean-install.sh ${{ matrix.platform }}
       - name: Set ARTIFACT_FILENAME
         run: |
           echo "ARTIFACT_FILENAME=$(echo bootstrap-linux-${{ matrix.container }}-${{ matrix.platform }} | sed 's/-darkglass-anagram//' | sed 's/:/-/g')" >> "${GITHUB_ENV}"
       - name: Pack bootstrap
         run: |
-          tar -C ~/mod-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}/host ${{ matrix.platform }}/target generic-aarch64/toolchain
+          if [ "${{ matrix.platform }}" = "darkglass-anagram-gcc15" ] || [ "${{ matrix.platform }}" = "darkglass-anagram-gcc15-debug" ]; then
+            gcc="gcc15"
+          else
+            gcc="gcc9"
+          fi
+          tar -C ~/darkglass-linux-workdir -czf ${{ env.ARTIFACT_FILENAME }}.tar.gz ${{ matrix.platform }}/host ${{ matrix.platform }}/target darkglass-cortex-a76.a55-${gcc}/toolchain
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_FILENAME }}
@@ -54,7 +59,7 @@ jobs:
     strategy:
       matrix:
         container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
-        platform: [darkglass-anagram, darkglass-anagram-debug]
+        platform: [darkglass-anagram, darkglass-anagram-debug, darkglass-anagram-gcc15]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
@@ -67,11 +72,11 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: ${{ env.ARTIFACT_FILENAME }}
-          path: ~/mod-workdir
+          path: ~/darkglass-linux-workdir
       - name: Extract bootstrap
         shell: bash
         run: |
-          tar -C ~/mod-workdir -xf ~/mod-workdir/${{ env.ARTIFACT_FILENAME }}.tar.gz
+          tar -C ~/darkglass-linux-workdir -xf ~/darkglass-linux-workdir/${{ env.ARTIFACT_FILENAME }}.tar.gz
       - name: Enable KXStudio repositories
         run: |
           apt-get update -qq && \

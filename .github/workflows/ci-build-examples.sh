@@ -31,15 +31,12 @@ for p in $(find examples/*/build -name '*.lv2' | grep -v '/_deps/'); do
         ${TARGET_DIR}/usr/lib/lv2/dg-meta/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-control-port-state-update.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-custom-styling.lv2/*.ttl \
+        ${TARGET_DIR}/usr/lib/lv2/dg-license.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/dg-properties.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-control-input-port-change-request.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-meta/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-programs.lv2/*.ttl \
         ${TARGET_DIR}/usr/lib/lv2/kx-properties.lv2/*.ttl \
-        ${TARGET_DIR}/usr/lib/lv2/mod.lv2/*.ttl \
-        ${TARGET_DIR}/usr/lib/lv2/modgui.lv2/*.ttl \
-        ${TARGET_DIR}/usr/lib/lv2/mod-hmi.lv2/*.ttl \
-        ${TARGET_DIR}/usr/lib/lv2/mod-license.lv2/*.ttl \
         ${p}/*.ttl
     cp -r ${p} lv2/
 done
@@ -55,14 +52,14 @@ fi
 # regular build
 build_and_validate
 
-# if already using mod-plugin-builder environment, stop here
+# if already using our plugin-builder environment, stop here
 if [ -n "${TARGET_DIR}" ]; then
   exit 0
 fi
 
-# build through mod-plugin-builder
+# build through our plugin-builder
 platform="${1}"
 [ -n "${platform}" ] || platform=darkglass-anagram
-[ -e mod-plugin-builder ] || git clone https://github.com/mod-audio/mod-plugin-builder --depth=1
-source ./mod-plugin-builder/local.env ${platform}
+[ -e plugin-builder ] || git clone https://github.com/Darkglass-Electronics/plugin-builder --depth=1
+source ./plugin-builder/local.env ${platform}
 build_and_validate

@@ -7,11 +7,11 @@ See [BUILDING-DOCKER.md](BUILDING-DOCKER.md) for instructions on how to build wh
 
 ### Step 1: Direct toolchain bootstrap
 
-Simply clone the [mod-plugin-builder](https://github.com/mod-audio/mod-plugin-builder/) git repository, install its dependencies and run the bootstrap script targetting Anagram. Like so:
+Simply clone our [plugin-builder](https://github.com/Darkglass-Electronics/plugin-builder/) git repository, install its dependencies and run the bootstrap script targetting Anagram. Like so:
 
 ```sh
 # clone MPB
-git clone https://github.com/mod-audio/mod-plugin-builder
+git clone https://github.com/Darkglass-Electronics/plugin-builder
 
 # install deps, taken from its README file
 sudo apt install acl bc curl cvs git mercurial rsync subversion wget \
@@ -19,7 +19,7 @@ bison bzip2 flex gawk gperf gzip help2man nano perl patch tar texinfo unzip \
 automake binutils build-essential cpio libtool libcrypt-dev libncurses-dev pkg-config python-is-python3 libtool-bin
 
 # bootstrap toolchain
-./mod-plugin-builder/bootstrap.sh darkglass-anagram
+./plugin-builder/bootstrap.sh darkglass-anagram
 ```
 
 This will take approximately 1 hour in total, and require around 5Gb of disk space.
@@ -27,11 +27,11 @@ This will take approximately 1 hour in total, and require around 5Gb of disk spa
 ### Step 2: Build your own project with the custom toolchain
 
 After having a toolchain we can start building code.  
-The mod-plugin-builder repo has a convenient "local.env" shell script that adjusts the local environment to use its custom toolchain, just use it like so:
+The plugin-builder repo has a convenient "local.env" shell script that adjusts the local environment to use its custom toolchain, just use it like so:
 
 ```sh
 # import toolchain setup into current shell
-source /path/to/mod-plugin-builder/local.env darkglass-anagram
+source /path/to/plugin-builder/local.env darkglass-anagram
 
 # setup your project for building
 cmake -S /path/to/your/project -B build-anagram
