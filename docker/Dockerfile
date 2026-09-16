@@ -22,7 +22,7 @@ RUN dpkg --add-architecture arm64
 # update and upgrade system and install packages for buildroot
 RUN apt-get update -qq && apt-get upgrade -qqy && \
     apt-get install -qqy qemu-user-static && \
-    apt-get install -qqy libc6:arm64 libstdc++6:arm64 zlib1g:arm64 && \
+    apt-get install -qqy libc6:arm64 libstdc++6:arm64 libfontconfig1:arm64 zlib1g:arm64 && \
     apt-get install -qqy locales acl bash bash-completion bc curl cvs git mercurial rsync subversion sudo wget dosfstools && \
     apt-get install -qqy bison bundler bzip2 cpio flex gawk gperf gzip help2man nano perl patch tar texinfo unzip && \
     apt-get install -qqy python-is-python3 python3-dev python3-setuptools && \
