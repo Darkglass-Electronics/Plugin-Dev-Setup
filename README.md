@@ -3,6 +3,7 @@
 This repository contains documentation and examples related to developing audio plugins for [Darkglass Anagram](https://www.darkglass.com/products/anagram/) as a platform.
 
 __PLEASE NOTE__ the Anagram can NOT load any custom plugins by default. If you have interest in developing for the Anagram, please contact `developers@darkglass.com` first.
+For hobbyists and tinkerers not interested in publishing to the Anagram Marketplace, there will be an alternative path, which we will announce soon.
 
 ## LV2
 
