@@ -1,0 +1,1073 @@
+#!/usr/bin/env python3
+
+# -*- coding: utf-8 -*-
+# Copyright (C) 2015-2026 MOD Audio Ltd
+# Copyright (C) 2026 Filipe Coelho <falktx@darkglass.com>
+
+# TODO
+# pylint: disable=consider-using-f-string
+# pylint: disable=invalid-name
+# pylint: disable=line-too-long
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+
+# WIP
+# - require enabled/bypass for all plugins
+# - require block image for all plugins
+# - require abbreviation for all plugins
+# - create a lv2lint-like minimal host that verifies that:
+# -- we can dlopen the binary
+# -- opening, closing and reopening the binary does not crash
+# -- if plugin is commercial (from ttl), licensing API matches it in the extension_data
+# -- if plugin is free (from ttl), licensing API matches it in the extension_data
+# - if lv2lint-like test passes, run it through valgrind too?
+
+# TODO other tasks
+# - if custom-styling block image is provided, verify types
+# - if custom-styling block settings is provided, verify types
+# - verify data and ranges for custom-styling
+# - call into lv2/sord_validate to deal with ttl syntax errors
+
+# ------------------------------------------------------------------------------------------------------------
+# Imports
+
+from pathlib import Path
+from urllib.parse import urlparse
+import shutil
+import os
+import sys
+import subprocess
+import glob
+import urllib.parse
+
+import lilv
+
+# ------------------------------------------------------------------------------------------------------------
+# Definitions
+
+PREFIX_LV2CORE  = "http://lv2plug.in/ns/lv2core#"
+PREFIX_MOD      = "http://moddevices.com/ns/mod#"
+PREFIX_DG       = "http://www.darkglass.com/lv2/ns#"
+
+generalwarnings = set()
+
+skipbinvalidation = False
+if not shutil.which("tiny-host"):
+    skipbinvalidation = True
+    generalwarnings.add("tiny-host not installed, skipped binary validation on all plugins")
+
+skipped_plugins = (
+    # needs a jack client
+    "urn:darkglass-anagram:fxloop",
+    "urn:darkglass-anagram:return",
+    "urn:darkglass-anagram:send",
+    "urn:darkglass-anagram:output",
+    # utility, never used in the chain
+    "http://gareus.org/oss/lv2/modmeter",
+    "http://gareus.org/oss/lv2/modspectre", # FIXME has memory leaks
+    "http://looperlative.com/plugins/lp3-anagram",
+    "urn:darkglass:Tuner",
+    "urn:darkglass-anagram:exp-pedal",
+    "urn:darkglass-anagram:meters",
+    "urn:darkglass-anagram:midi-cc-helper",
+    "urn:darkglass-anagram:midi-pc-gen",
+    "urn:darkglass-anagram:mixer",
+    "urn:darkglass-anagram:sine-gen",
+)
+
+# ------------------------------------------------------------------------------------------------------------
+# Utilities
+
+def is_pablito():
+    try:
+        with open("/proc/device-tree/model") as f:
+            return "Pablito" in f.read()
+    except OSError:
+        return False
+
+
+class NS():
+    def NS(self):
+        pass
+
+    def __init__(self, world, base):
+        self.world = world
+        self.base = base
+        self._cache = {}
+
+    def __getattr__(self, attr):
+        if attr.endswith("_"):
+            attr = attr[:-1]
+        if attr not in self._cache:
+            self._cache[attr] = self.world.new_uri(self.base + attr)
+        return self._cache[attr]
+
+
+def validate_plugin_binary(plugin, target_dir):
+    bintestresults = {
+        "errors": [],
+        "warnings": [],
+        "pedantic": [],
+    }
+
+    lib_path = Path(urlparse(str(plugin.get_library_uri())).path)
+    bundle_path = Path(urlparse(str(plugin.get_bundle_uri())).path)
+    plugin_uri = str(plugin.get_uri())
+
+    def get_binary_format(path):
+        if is_pablito():
+            return "aarch64"
+        out = subprocess.run(["file", str(path)], capture_output=True, text=True).stdout
+        if "x86" in out:
+            return "x86"
+        if "aarch64" in out:
+            return "aarch64"
+        return None
+
+    plugin_format = get_binary_format(lib_path)
+    host_format   = get_binary_format("/usr/bin/tiny-host")
+
+    runcommand = ["tiny-host", f"{bundle_path}/", plugin_uri]
+
+    if plugin_format == host_format:
+        if shutil.which("valgrind"):
+            runcommand = [
+                "valgrind",
+                "--error-exitcode=99", #Use specific exitcode for valgrind errors
+                "--leak-check=full",
+                "--errors-for-leak-kinds=definite,indirect",
+                "--show-leak-kinds=definite,indirect",
+                "--track-origins=yes",
+            ] + runcommand
+    elif plugin_format == "aarch64" and shutil.which("qemu-aarch64"):
+        runcommand = ["qemu-aarch64", "-L", f"{target_dir}/target/usr/"] + runcommand
+    else:
+        bintestresults["warnings"].append(f"cannot validate: plugin is {plugin_format}, host is {host_format}, no emulator available")
+        return bintestresults
+
+    result = subprocess.run(runcommand, capture_output=True, text=True)
+
+    def hash_uri(s: str):
+        h = 0xcbf29ce484222325
+        for c in s.encode("utf-8"):
+            h ^= c
+            h = (h * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF
+        return f"{h:016x}"
+
+    def parse_result(result_type):
+        resultsfile = Path(f"/tmp/{hash_uri(plugin_uri)}_tinyhost_testresult_{result_type}.txt")
+        file_notes = ""
+        if resultsfile.exists():
+            try:
+                file_notes = resultsfile.read_text().strip()
+            finally:
+                resultsfile.unlink(missing_ok=True)
+        return file_notes
+
+    err_msg = parse_result("err")
+    warn_msg = parse_result("warn")
+    pedan_msg = parse_result("pedantic")
+
+    # We do not have to check for exit code 1, this message will already be picked up by err_msg below
+    rc = result.returncode
+    if rc == 99:
+        bintestresults["errors"].append(f"valgrind detected memory issues while running plugin in tiny-host:\n{result.stderr or result.stdout}\n")
+    elif rc >= 128:
+        sig = rc - 128
+        bintestresults["errors"].append(f"tiny-host was killed by signal {sig} (likely crashed inside plugin code)")
+
+    if err_msg:
+        bintestresults["errors"].append(err_msg)
+    if warn_msg:
+        bintestresults["warnings"].append(warn_msg)
+    if pedan_msg:
+        bintestresults["pedantic"].append(pedan_msg)
+
+    return bintestresults
+
+def validate_plugin_ttl_with_sord(plugin_bundle_path, system_dir):
+    lv2_path = f"{system_dir}/usr/lib/lv2"
+
+    # collect extension TTLs
+    extra_specs = (
+        "dg-meta/*.ttl",
+        "dg-control-port-state-update.lv2/*.ttl",
+        "dg-custom-styling.lv2/*.ttl",
+        "dg-license.lv2/*.ttl",
+        "dg-properties.lv2/*.ttl",
+        "kx-control-input-port-change-request.lv2/*.ttl",
+        "kx-meta/*.ttl",
+        "kx-programs.lv2/*.ttl",
+        "kx-properties.lv2/*.ttl",
+        "mod.lv2/*.ttl",
+        "modgui.lv2/*.ttl",
+        "mod-hmi.lv2/*.ttl",
+        "mod-license.lv2/*.ttl",
+    )
+    extra_spec_ttls = []
+    for extra_spec in extra_specs:
+        extra_spec_ttls += glob.glob(os.path.join(lv2_path, extra_spec))
+
+    # collect plugin TTLs
+    plugin_ttls = glob.glob(os.path.join(plugin_bundle_path, "*.ttl"))
+
+    result = subprocess.run(
+        ["lv2_validate"] + extra_spec_ttls + plugin_ttls,
+        capture_output=True,
+        text=True
+    )
+
+    output = (result.stderr or "") + (result.stdout or "")
+    output = output.strip()
+    return output or None
+
+def is_integer(string):
+    return string.strip().lstrip("-+").isdigit()
+
+def first_or(nodes, fallback):
+    first = next(iter(nodes), None)
+    return first if first is not None else fallback
+
+def int_first_or(nodes):
+    first = next(iter(nodes), None)
+    return int(first) if first is not None else 0
+
+def str_first_or(nodes):
+    if nodes is None:
+        return ""
+    first = next(iter(nodes), None)
+    return str(first) if first is not None else ""
+
+def str_or(node):
+    return str(node) if node is not None else ""
+
+def iter_compat(value, conv = str):
+    data  = []
+    viter = iter(value)
+    value = next(viter, None)
+    while value is not None:
+        data.append(conv(value))
+        value = next(viter, None)
+    return data
+
+def get_short_port_name(portName):
+    if len(portName) <= 16:
+        return portName
+
+    portName = portName.split("/",1)[0].split(" (",1)[0].split(" [",1)[0].strip()
+
+    # cut stuff if too big
+    if len(portName) > 16:
+        portName = portName[0] + portName[1:].replace("a","").replace("e","").replace("i","").replace("o","").replace("u","")
+
+        if len(portName) > 16:
+            portName = portName[:16]
+
+    return portName.strip()
+
+# ------------------------------------------------------------------------------------------------------------
+
+def get_category(nodes):
+    if nodes is None:
+        return []
+
+    lv2_category_indexes = {
+        'DelayPlugin': ['Delay'],
+        'DistortionPlugin': ['Distortion'],
+        'WaveshaperPlugin': ['Distortion', 'Waveshaper'],
+        'DynamicsPlugin': ['Dynamics'],
+        'AmplifierPlugin': ['Dynamics', 'Amplifier'],
+        'CompressorPlugin': ['Dynamics', 'Compressor'],
+        'ExpanderPlugin': ['Dynamics', 'Expander'],
+        'GatePlugin': ['Dynamics', 'Gate'],
+        'LimiterPlugin': ['Dynamics', 'Limiter'],
+        'FilterPlugin': ['Filter'],
+        'AllpassPlugin': ['Filter', 'Allpass'],
+        'BandpassPlugin': ['Filter', 'Bandpass'],
+        'CombPlugin': ['Filter', 'Comb'],
+        'EQPlugin': ['Filter', 'Equaliser'],
+        'MultiEQPlugin': ['Filter', 'Equaliser', 'Multiband'],
+        'ParaEQPlugin': ['Filter', 'Equaliser', 'Parametric'],
+        'HighpassPlugin': ['Filter', 'Highpass'],
+        'LowpassPlugin': ['Filter', 'Lowpass'],
+        'GeneratorPlugin': ['Generator'],
+        'ConstantPlugin': ['Generator', 'Constant'],
+        'InstrumentPlugin': ['Generator', 'Instrument'],
+        'OscillatorPlugin': ['Generator', 'Oscillator'],
+        'ModulatorPlugin': ['Modulator'],
+        'ChorusPlugin': ['Modulator', 'Chorus'],
+        'FlangerPlugin': ['Modulator', 'Flanger'],
+        'PhaserPlugin': ['Modulator', 'Phaser'],
+        'ReverbPlugin': ['Reverb'],
+        'SimulatorPlugin': ['Simulator'],
+        'SpatialPlugin': ['Spatial'],
+        'SpectralPlugin': ['Spectral'],
+        'PitchPlugin': ['Spectral', 'Pitch Shifter'],
+        'UtilityPlugin': ['Utility'],
+        'AnalyserPlugin': ['Utility', 'Analyser'],
+        'ConverterPlugin': ['Utility', 'Converter'],
+        'FunctionPlugin': ['Utility', 'Function'],
+        'MixerPlugin': ['Utility', 'Mixer'],
+        #'MIDIPlugin': ['MIDI', 'Utility'],
+    }
+    mod_category_indexes = {
+        'DelayPlugin': ['Delay'],
+        'DistortionPlugin': ['Distortion'],
+        'DynamicsPlugin': ['Dynamics'],
+        'FilterPlugin': ['Filter'],
+        'GeneratorPlugin': ['Generator'],
+        'ModulatorPlugin': ['Modulator'],
+        'ReverbPlugin': ['Reverb'],
+        'SimulatorPlugin': ['Simulator'],
+        'SpatialPlugin': ['Spatial'],
+        'SpectralPlugin': ['Spectral'],
+        'UtilityPlugin': ['Utility'],
+        'MIDIPlugin': ['Utility', 'MIDI'],
+        'ControlVoltagePlugin': ['ControlVoltage'],
+    }
+
+    def fill_in_lv2_categories(nodes):
+        cats = []
+        for node in nodes:
+            category = str(node).replace(PREFIX_LV2CORE,"")
+            if category in lv2_category_indexes:
+                cats += lv2_category_indexes[category]
+        return cats
+
+    def fill_in_mod_categories(nodes):
+        cats = []
+        for node in nodes:
+            category = str(node).replace(PREFIX_MOD,"")
+            if category in mod_category_indexes:
+                cats += mod_category_indexes[category]
+        return cats
+
+    categories = []
+
+    # find MOD category first, takes precedence
+    for cat in fill_in_mod_categories(nodes):
+        if cat not in categories:
+            categories.append(cat)
+
+    if len(categories) > 0:
+        return categories
+
+    for cat in fill_in_lv2_categories(nodes):
+        if cat not in categories:
+            categories.append(cat)
+
+    return categories
+
+def get_port_data(port, subj):
+    return iter_compat(port.get_value(subj))
+
+def get_port_unit(miniuri):
+    # using label, render, symbol
+    units = {
+        's': ["seconds", "%f s", "s"],
+        'ms': ["milliseconds", "%f ms", "ms"],
+        'min': ["minutes", "%f mins", "min"],
+        'bar': ["bars", "%f bars", "bars"],
+        'beat': ["beats", "%f beats", "beats"],
+        'frame': ["audio frames", "%f frames", "frames"],
+        'm': ["metres", "%f m", "m"],
+        'cm': ["centimetres", "%f cm", "cm"],
+        'mm': ["millimetres", "%f mm", "mm"],
+        'km': ["kilometres", "%f km", "km"],
+        'inch': ["inches", """%f\"""", "in"],
+        'mile': ["miles", "%f mi", "mi"],
+        'db': ["decibels", "%f dB", "dB"],
+        'pc': ["percent", "%f%%", "%"],
+        'coef': ["coefficient", "* %f", "*"],
+        'hz': ["hertz", "%f Hz", "Hz"],
+        'khz': ["kilohertz", "%f kHz", "kHz"],
+        'mhz': ["megahertz", "%f MHz", "MHz"],
+        'bpm': ["beats per minute", "%f BPM", "BPM"],
+        'oct': ["octaves", "%f octaves", "oct"],
+        'cent': ["cents", "%f ct", "ct"],
+        'semitone12TET': ["semitones", "%f semi", "semi"],
+        'degree': ["degrees", "%f deg", "deg"],
+        'midiNote': ["MIDI note", "MIDI note %d", "note"],
+        'volts': ["volts", "%f v", "v"],
+    }
+    if miniuri in units:
+        return units[miniuri]
+    return ("","","")
+
+# ------------------------------------------------------------------------------------------------------------
+# get_bundle_dirname
+
+def get_bundle_dirname(bundleuri):
+    world = lilv.World()
+    bundle = str(world.new_uri(bundleuri).get_path())
+
+    if not os.path.exists(bundle):
+        raise IOError(bundleuri)
+
+    if os.path.isfile(bundle):
+        bundle = os.path.dirname(bundle)
+
+    return bundle
+
+# ------------------------------------------------------------------------------------------------------------
+# get_plugin_info
+
+# Get info from a lilv plugin
+# This is used in get_plugins_info below and MOD-SDK
+def get_plugin_info(world, plugin, target_dir):
+    # define the needed stuff
+    ns_rdf     = NS(world, lilv.LILV_NS_RDF)
+    ns_rdfs    = NS(world, lilv.LILV_NS_RDFS)
+    ns_lv2core = NS(world, lilv.LILV_NS_LV2)
+    ns_atom    = NS(world, "http://lv2plug.in/ns/ext/atom#")
+    ns_midi    = NS(world, "http://lv2plug.in/ns/ext/midi#")
+    ns_pprops  = NS(world, "http://lv2plug.in/ns/ext/port-props#")
+    ns_pset    = NS(world, "http://lv2plug.in/ns/ext/presets#")
+    ns_units   = NS(world, "http://lv2plug.in/ns/extensions/units#")
+    ns_mod     = NS(world, PREFIX_MOD)
+    ns_dg      = NS(world, PREFIX_DG)
+
+    bundleuri = plugin.get_bundle_uri()
+    bundle    = bundleuri.get_path()
+    bundleuri = str(bundleuri)
+
+    errors   = []
+    warnings = []
+    pedantic = []
+
+    if not skipbinvalidation:
+        binresult = validate_plugin_binary(plugin, target_dir)
+        if binresult is not None:
+            if binresult.get("errors"):
+                errors += binresult["errors"]
+            if binresult.get("warnings"):
+                warnings += binresult["warnings"]
+            if binresult.get("pedantic"):
+                pedantic += binresult["pedantic"]
+
+    # --------------------------------------------------------------------------------------------------------
+    # uri
+
+    uri = str(plugin.get_uri())
+
+    if not uri:
+        errors.append("plugin uri is missing or invalid")
+    elif uri.startswith("file:"):
+        errors.append("plugin uri is local, and thus not suitable for redistribution")
+    #elif not (uri.startswith("http:") or uri.startswith("https:")):
+        #warnings.append("plugin uri is not a real url")
+
+    # --------------------------------------------------------------------------------------------------------
+    # name
+
+    name = str(plugin.get_name())
+
+    if not name:
+        errors.append("plugin name is missing")
+
+    # --------------------------------------------------------------------------------------------------------
+    # binary
+
+    binary = plugin.get_library_uri().get_path()
+
+    if not binary:
+        errors.append("plugin binary is missing")
+    else:
+        binary = binary.replace(bundle,"",1)
+
+    # --------------------------------------------------------------------------------------------------------
+    # version
+
+    microver = first_or(plugin.get_value(ns_lv2core.microVersion), None)
+    minorver = first_or(plugin.get_value(ns_lv2core.minorVersion), None)
+
+    if microver is None and minorver is None:
+        errors.append("plugin is missing version information")
+
+    else:
+        if minorver is None:
+            errors.append("plugin is missing minorVersion")
+
+        if microver is None:
+            errors.append("plugin is missing microVersion")
+
+    # --------------------------------------------------------------------------------------------------------
+    # author
+
+    author = str_or(plugin.get_author_name())
+
+    if not author:
+        errors.append("plugin author name is missing")
+
+    # --------------------------------------------------------------------------------------------------------
+    # Darkglass metadata
+
+    dgabbreviation = first_or(plugin.get_value(ns_dg.abbreviation), None)
+    if dgabbreviation is None:
+        errors.append("plugin abbreviation is missing")
+
+    # Ignore this when we are looking at the anagram system blocks
+    if not (is_pablito() and plugin.get_library_uri().get_path().startswith("/usr/")):
+        blockimageon = first_or(plugin.get_value(ns_dg.blockImageOn), None)
+        blockimageoff = first_or(plugin.get_value(ns_dg.blockImageOff), None)
+
+        if blockimageon is None and blockimageoff is None:
+            errors.append("plugin is missing block images")
+        else:
+            if blockimageon is None:
+                errors.append("plugin is missing blockImageOn")
+            if blockimageoff is None:
+                errors.append("plugin is missing blockImageOff")
+
+    # --------------------------------------------------------------------------------------------------------
+    # commercial
+
+    commercial_uris = {
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#interface": None,
+        "http://moddevices.com/ns/ext/license#interface": None,
+    }
+
+    requiredfeatures = [f for f in plugin.get_required_features()]
+    iscommercial = (
+        "http://www.darkglass.com/lv2/ns/lv2ext/license#feature" in requiredfeatures or
+        "http://moddevices.com/ns/ext/license#feature" in requiredfeatures
+    )
+
+    for curi in commercial_uris:
+        node = world.new_uri(curi)
+        commercial_uris[curi] = plugin.has_extension_data(node)
+
+    if iscommercial:
+        if not any(curi for curi, found in commercial_uris.items() if found):
+            errors.append("commercial plugin is missing extension data for license interface")
+    else:
+        for curi, found in commercial_uris.items():
+            if found:
+                errors.append("free plugin has unexpected commercial extension data: "  + curi)
+                break
+
+    # --------------------------------------------------------------------------------------------------------
+    # ports
+
+    index = 0
+    destenabledfound = False
+    ports = {
+        'audio'  : { 'input': [], 'output': [] },
+        'control': { 'input': [], 'output': [] },
+        'midi'   : { 'input': [], 'output': [] }
+    }
+
+    portsymbols = []
+    portnames   = []
+
+    # function for filling port info
+    def fill_port_info(port):
+
+        nonlocal destenabledfound
+        # base data
+        portname = str_or(port.get_name())
+
+        if not portname:
+            portname = "_%i" % index
+            errors.append("port with index %i has no name" % index)
+
+        portsymbol = str_or(port.get_symbol())
+
+        if not portsymbol:
+            portsymbol = "_%i" % index
+            errors.append("port with index %i has no symbol" % index)
+
+        # check for duplicate names
+        if portname in portnames:
+            pedantic.append("port name '%s' is not unique" % portname)
+        else:
+            portnames.append(portname)
+
+        # check for duplicate symbols
+        if portsymbol in portsymbols:
+            errors.append("port symbol '%s' is not unique" % portsymbol)
+        else:
+            portsymbols.append(portsymbol)
+
+        # short name
+        psname = str_first_or(port.get_value(ns_lv2core.shortName))
+
+        if not psname:
+            psname = get_short_port_name(portname)
+            if len(psname) > 16:
+                warnings.append("port '%s' name is too big, reduce the name size or provide a shortName" % portname)
+
+        elif len(psname) > 16:
+            psname = psname[:16]
+            errors.append("port '%s' short name has more than 16 characters" % portname)
+
+        # check for old style shortName
+        if first_or(port.get_value(ns_lv2core.shortname), None) is not None:
+            errors.append("port '%s' short name is using old style 'shortname' instead of 'shortName'" % portname)
+
+        # port types
+        types = [typ.rsplit("#",1)[-1].replace("Port","",1) for typ in get_port_data(port, ns_rdf.type_)]
+
+        if "Atom" in types \
+        and port.supports_event(ns_midi.MidiEvent) \
+        and str_first_or(port.get_value(ns_atom.bufferType)) == ns_atom.Sequence:
+            types.append("MIDI")
+
+        # port comment
+        pcomment = (get_port_data(port, ns_rdfs.comment) or [""])[0]
+
+        # port designation
+        designation = (get_port_data(port, ns_lv2core.designation) or [""])[0]
+
+        # port rangeSteps
+        rangeSteps = (get_port_data(port, ns_mod.rangeSteps) or get_port_data(port, ns_pprops.rangeSteps) or [None])[0]
+
+        # port properties
+        properties = [typ.rsplit("#",1)[-1] for typ in get_port_data(port, ns_lv2core.portProperty)]
+
+        # data
+        ranges      = {}
+        scalepoints = []
+
+        # unit block
+        ulabel  = ""
+        urender = ""
+        usymbol = ""
+
+        # control and cv must contain ranges, might contain scale points
+        if "Control" in types or "CV" in types:
+
+            if designation == (PREFIX_LV2CORE + "enabled"):
+                destenabledfound = True
+
+            isInteger = "integer" in properties
+
+            if isInteger and "CV" in types:
+                errors.append("port '%s' has integer property and CV type" % portname)
+
+            xdefault = first_or(port.get_value(ns_mod.default), first_or(port.get_value(ns_lv2core.default), None))
+            xminimum = first_or(port.get_value(ns_mod.minimum), first_or(port.get_value(ns_lv2core.minimum), None))
+            xmaximum = first_or(port.get_value(ns_mod.maximum), first_or(port.get_value(ns_lv2core.maximum), None))
+
+            if xminimum is not None and xmaximum is not None:
+                if isInteger:
+                    if xminimum.is_int():
+                        ranges['minimum'] = int(xminimum)
+                    elif xminimum.is_float():
+                        ranges['minimum'] = int(float(xminimum))
+                        pedantic.append("port '%s' has integer property but minimum value is not an integer" % portname)
+                    else:
+                        errors.append("port '%s' minimum value is not an integer or float" % portname)
+
+                    if xmaximum.is_int():
+                        ranges['maximum'] = int(xmaximum)
+                    elif xmaximum.is_float():
+                        ranges['maximum'] = int(float(xmaximum))
+                        pedantic.append("port '%s' has integer property but maximum value is not an integer" % portname)
+                    else:
+                        errors.append("port '%s' maximum value is not an integer or float" % portname)
+
+                else:
+                    if xminimum.is_float():
+                        ranges['minimum'] = float(xminimum)
+                    elif xminimum.is_int():
+                        ranges['minimum'] = float(int(xminimum))
+                        pedantic.append("port '%s' does not have integer property but minimum value is an integer" % portname)
+                    else:
+                        ranges['minimum'] = 0.0
+                        errors.append("port '%s' minimum value is not an integer or float" % portname)
+
+                    if xmaximum.is_float():
+                        ranges['maximum'] = float(xmaximum)
+                    elif xmaximum.is_int():
+                        ranges['maximum'] = float(int(xmaximum))
+                        pedantic.append("port '%s' does not have integer property but maximum value is an integer" % portname)
+                    else:
+                        ranges['maximum'] = 1.0
+                        errors.append("port '%s' maximum value is not an integer or float" % portname)
+
+                if ranges['minimum'] >= ranges['maximum']:
+                    ranges['maximum'] = ranges['minimum'] + (1 if isInteger else 0.1)
+                    errors.append("port '%s' minimum value is equal or higher than its maximum" % portname)
+
+                if xdefault is not None:
+                    if isInteger:
+                        if xdefault.is_int():
+                            ranges['default'] = int(xdefault)
+                        elif xdefault.is_float():
+                            ranges['default'] = int(float(xdefault))
+                            pedantic.append("port '%s' has integer property but default value is not an integer" % portname)
+                        else:
+                            ranges['default'] = ranges['minimum']
+                            errors.append("port '%s' default value is not an integer or float" % portname)
+
+                    else:
+                        if xdefault.is_float():
+                            ranges['default'] = float(xdefault)
+                        elif xdefault.is_int():
+                            ranges['default'] = float(int(xdefault))
+                            pedantic.append("port '%s' does not have integer property but default value is an integer" % portname)
+                        else:
+                            ranges['default'] = 0.0
+                            errors.append("port '%s' default value is not an integer or float" % portname)
+
+                    testmin = ranges['minimum']
+                    testmax = ranges['maximum']
+
+                    if "sampleRate" in properties:
+                        testmin *= 48000
+                        testmax *= 48000
+
+                    if not testmin <= ranges['default'] <= testmax:
+                        ranges['default'] = ranges['minimum']
+                        errors.append("port '%s' default value is out of bounds" % portname)
+
+                else:
+                    ranges['default'] = ranges['minimum']
+
+                    if "Input" in types:
+                        errors.append("port '%s' is missing default value" % portname)
+
+            else:
+                if isInteger:
+                    ranges['minimum'] = 0
+                    ranges['maximum'] = 1
+                    ranges['default'] = 0
+                else:
+                    ranges['minimum'] = -1.0 if "CV" in types else 0.0
+                    ranges['maximum'] = 1.0
+                    ranges['default'] = 0.0
+
+                if "CV" not in types and designation != (PREFIX_LV2CORE + "latency"):
+                    errors.append("port '%s' is missing value ranges" % portname)
+
+            scalepoint_nodes = port.get_scale_points()
+
+            if scalepoint_nodes is not None:
+                scalepoints_unsorted = []
+
+                for sp in scalepoint_nodes:
+                    label = sp.get_label()
+                    value = sp.get_value()
+
+                    if label is None:
+                        errors.append("a port scalepoint is missing its label")
+                        continue
+
+                    label = str(label)
+
+                    if not label:
+                        errors.append("a port scalepoint label is empty")
+                        continue
+
+                    if value is None:
+                        errors.append("port scalepoint '%s' is missing its value" % label)
+                        continue
+
+                    if isInteger:
+                        if value.is_int():
+                            value = int(value)
+                        elif value.is_float():
+                            value = float(value)
+                            pedantic.append(f"port '{portname}' scalepoint '{label}' value is not an integer")
+                        else:
+                            value = ranges['minimum']
+                            errors.append(f"port '{portname}' scalepoint '{label}' value is not an integer or float")
+
+                    else:
+                        if value.is_int():
+                            value = int(value)
+                            pedantic.append(f"port '{portname}' scalepoint '{label}' value is an integer")
+                        elif value.is_float():
+                            value = float(value)
+                        else:
+                            value = ranges['minimum']
+                            errors.append(f"port '{portname}' scalepoint '{label}' value is not an integer or float")
+
+                    if ranges['minimum'] <= value <= ranges['maximum']:
+                        scalepoints_unsorted.append((value, label))
+                    else:
+                        errors.append(("port scalepoint '%s' has an out-of-bounds value:\n" % label) +
+                                      ("%d < %d < %d" if isInteger else "%f < %f < %f") % (ranges['minimum'], value, ranges['maximum']))
+
+                if len(scalepoints_unsorted) != 0:
+                    unsorted = dict(s for s in scalepoints_unsorted)
+                    values   = list(v for v, l in scalepoints_unsorted)
+                    values.sort()
+                    scalepoints = list({ 'value': v, 'label': unsorted[v] } for v in values)
+
+            if "enumeration" in properties and len(scalepoints) <= 1:
+                errors.append("port '%s' wants to use enumeration but doesn't have enough values" % portname)
+                properties.remove("enumeration")
+
+        # control ports might contain unit
+        if "Control" in types:
+            # unit
+            uunit = first_or(port.get_value(ns_units.unit), None)
+
+            if uunit is not None:
+                uuri = str(uunit)
+
+                # using pre-existing lv2 unit
+                if uuri is not None and uuri.startswith("http://lv2plug.in/ns/"):
+                    uuri  = uuri.replace("http://lv2plug.in/ns/extensions/units#","",1)
+                    uuri  = uuri.replace(PREFIX_MOD,"",1)
+                    alnum = uuri.isalnum()
+
+                    if not alnum:
+                        errors.append("port '%s' has wrong lv2 unit uri" % portname)
+                        uuri = uuri.rsplit("#",1)[-1].rsplit("/",1)[-1]
+
+                    ulabel, urender, usymbol = get_port_unit(uuri)
+
+                    if alnum and not (ulabel and urender and usymbol):
+                        errors.append("port '%s' has unknown lv2 unit (our bug?, data is '%s', '%s', '%s')" % (portname,
+                                                                                                               ulabel,
+                                                                                                               urender,
+                                                                                                               usymbol))
+
+                # using custom unit
+                else:
+                    xlabel = first_or(world.find_nodes(uunit, ns_rdfs.label, None), None)
+                    xrender = first_or(world.find_nodes(uunit, ns_units.render, None), None)
+                    xsymbol = first_or(world.find_nodes(uunit, ns_units.symbol, None), None)
+
+                    if xlabel is not None:
+                        ulabel = str(xlabel)
+                    else:
+                        errors.append("port '%s' has custom unit with no label" % portname)
+
+                    if xrender is not None:
+                        urender = str(xrender)
+                    else:
+                        errors.append("port '%s' has custom unit with no render" % portname)
+
+                    if xsymbol is not None:
+                        usymbol = str(xsymbol)
+                    else:
+                        errors.append("port '%s' has custom unit with no symbol" % portname)
+
+        return (types, {
+            'name'   : portname,
+            'symbol' : portsymbol,
+            'ranges' : ranges,
+            'units'  : {
+                'label' : ulabel,
+                'render': urender,
+                'symbol': usymbol,
+            } if "Control" in types and ulabel and urender and usymbol else {},
+            'comment'    : pcomment,
+            'designation': designation,
+            'properties' : sorted(properties),
+            'rangeSteps' : rangeSteps,
+            'scalePoints': scalepoints,
+            'shortName'  : psname,
+        })
+
+    for p in (plugin.get_port_by_index(i) for i in range(plugin.get_num_ports())):
+        types, info = fill_port_info(p)
+
+        info['index'] = index
+        index += 1
+
+        isInput = "Input" in types
+        types.remove("Input" if isInput else "Output")
+
+        for typ in [typl.lower() for typl in types]:
+            if typ not in ports:
+                ports[typ] = { 'input': [], 'output': [] }
+            ports[typ]["input" if isInput else "output"].append(info)
+
+    if destenabledfound is False:
+        errors.append(f"enabled/disabled not handled: designation '{PREFIX_LV2CORE}enabled' not found")
+
+    # --------------------------------------------------------------------------------------------------------
+    # presets
+
+    def get_preset_data(preset):
+        world.load_resource(preset)
+
+        uri   = str_or(preset)
+        label = str_first_or(world.find_nodes(preset, ns_rdfs.label, None))
+
+        if not uri:
+            errors.append("preset with label '%s' has no uri" % (label or "<unknown>"))
+        if not label:
+            errors.append("preset with uri '%s' has no label" % (uri or "<unknown>"))
+
+    iter_compat(plugin.get_related(ns_pset.Preset), get_preset_data)
+
+    # --------------------------------------------------------------------------------------------------------
+    # done
+
+    return {
+        'uri' : uri,
+        'errors'  : sorted(errors),
+        'warnings': sorted(warnings),
+        'pedantic': sorted(pedantic),
+    }
+
+# ------------------------------------------------------------------------------------------------------------
+# get_plugins_info
+
+# Get plugin-related info from a list of lv2 bundles
+# @a bundles is a list of strings, consisting of directories in the filesystem (absolute pathnames).
+def get_plugins_info(bundles):
+    # Create our own unique lilv world
+    # We'll load the selected bundles and get all plugins from it
+    world = lilv.World()
+    # this is needed when loading specific bundles instead of load_all
+    world.load_specifications()
+    world.load_plugin_classes()
+
+    # Check if we are running in docker DEBUG image
+    anagram_target_dir = ""
+    bashrcfile = f"{Path.home()}/.bashrc"
+
+    # FIXME improve to support any variant (e.g. gcc15)
+    if os.path.exists(bashrcfile):
+        with open(bashrcfile, 'r') as fh:
+            bashrccontent = fh.read()
+
+        anagram_target_dir = "darkglass-anagram"
+        if "darkglass-anagram-debug" in bashrccontent:
+            anagram_target_dir += "-debug"
+
+    # Find dir for LV2 extensions
+    modworkdir = os.getenv("WORKDIR", f"{Path.home()}/mod-workdir")
+    if os.path.exists(modworkdir):
+        system_dir = f"{modworkdir}/{anagram_target_dir}/target"
+    else:
+        system_dir = ""
+
+    sord_notes_by_bundle = {}
+
+    # load all bundles
+    if len(bundles) == 0:
+        world.load_all()
+    else:
+        for bundle in bundles:
+            notes = validate_plugin_ttl_with_sord(bundle, system_dir)
+            bundle_abs = os.path.abspath(bundle).rstrip(os.sep)
+            sord_notes_by_bundle[bundle_abs] = notes
+
+            # lilv wants the last character as the separator
+            bundle_for_lilv = bundle_abs + os.sep
+            # convert bundle string into a lilv node
+            bundlenode = world.new_file_uri(None, bundle_for_lilv)
+            # load the bundle
+            world.load_bundle(bundlenode)
+
+    # get all plugins available in the selected bundles
+    plugins = world.get_all_plugins()
+    if len(plugins) == 0:
+        return []
+
+    def conv(plugin):
+        if str(plugin.get_uri()) in skipped_plugins:
+            return None
+
+        entry = get_plugin_info(world, plugin, system_dir)
+
+        # map this plugin back to its bundle, to be able to add sord's notes
+        bundle_uri = str(plugin.get_bundle_uri())
+        bundle_path = urllib.parse.urlparse(bundle_uri).path.rstrip(os.sep)
+
+        notes = sord_notes_by_bundle.get(bundle_path)
+        if notes:
+            entry['sord_validate_notes'] = notes
+
+        return entry
+
+    return iter_compat(plugins, conv)
+
+# ------------------------------------------------------------------------------------------------------------
+
+def usage(exit_code):
+    print(f'Usage: {sys.argv[0]} [/path/to/lv2/bundle] <extra-options>')
+    print()
+    print('Extra options:')
+    print('  --no-pedantic    Skip pedantic messages')
+    print('  --no-warnings    Skip warnings')
+    print('  --verbose        Always show all plugins, good ones too')
+    sys.exit(exit_code)
+
+# ------------------------------------------------------------------------------------------------------------
+
+def main():
+    if '-h' in sys.argv or '--help' in sys.argv:
+        usage(0)
+
+    warnings = True
+    pedantic = True
+    verbose = False
+
+    bundles = []
+    for arg in sys.argv[1:]:
+        if arg == '--':
+            break
+        elif arg == '--no-pedantic':
+            pedantic = False
+        elif arg == '--no-warnings':
+            warnings = pedantic = False
+        elif arg == '--verbose':
+            verbose = True
+        elif arg.startswith('--'):
+            usage(1)
+        else:
+            if not os.path.isdir(arg):
+                usage(1)
+
+            bundles.append(arg)
+
+    for i in get_plugins_info(bundles):
+        if i is None:
+            continue
+        if not verbose and not i['errors'] and (not warnings or not i['warnings']) and (not pedantic or not i['pedantic']):
+            continue
+
+        print(f'------------ {i["uri"]}')
+        if warnings and not (i['errors'] or i['warnings']):
+            print('No errors or warnings')
+
+        else:
+            if i['errors']:
+                print('Errors:')
+                for msg in i['errors']:
+                    print(f'  - {msg}')
+            else:
+                print('No errors')
+
+            if warnings:
+                if i['warnings']:
+                    print('Warnings:')
+                    for msg in i['warnings']:
+                        print(f'  - {msg}')
+                elif not i['errors']:
+                    print('No warnings')
+
+        if pedantic:
+            if i['pedantic']:
+                print('Pedantic info:')
+                for msg in i['pedantic']:
+                    print(f'  - {msg}')
+
+        print()
+
+    if generalwarnings:
+        print('General warnings:')
+        for msg in generalwarnings:
+            print(f'  - {msg}')
+
+    print()
+
+# ------------------------------------------------------------------------------------------------------------
+
+if __name__ == '__main__':
+    main()
+
+# ------------------------------------------------------------------------------------------------------------
