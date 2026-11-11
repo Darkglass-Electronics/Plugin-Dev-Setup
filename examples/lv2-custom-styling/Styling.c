@@ -27,6 +27,7 @@ typedef enum {
     kPortFloat2,
     kPortFloat3,
     kPortMeter,
+    kPortValue,
     kPortCount
 } Ports;
 
@@ -34,7 +35,10 @@ typedef struct {
     const float* in;
     float* out;
     float* meter;
+    float* value;
     float meterValue;
+    uint32_t samplesPerStep;
+    uint32_t sampleCounter;
 } ExamplePlugin;
 
 static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
@@ -42,7 +46,10 @@ static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
                                   const char* bundlepath,
                                   const LV2_Feature* const* features)
 {
-    return calloc(1, sizeof(ExamplePlugin));
+    ExamplePlugin* plugin = calloc(1, sizeof(ExamplePlugin));
+    if (plugin != NULL)
+        plugin->samplesPerStep = (uint32_t)sampleRate;
+    return plugin;
 }
 
 static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
@@ -59,6 +66,9 @@ static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
     case kPortMeter:
         plugin->meter = data;
         break;
+    case kPortValue:
+        plugin->value = data;
+        break;
     }
 }
 
@@ -69,13 +79,19 @@ static void lv2_run(LV2_Handle handle, uint32_t numSamples)
     if (plugin->out != plugin->in)
         memcpy(plugin->out, plugin->in, sizeof(float) * numSamples);
 
-    // arbitrary increase just for testing
-    plugin->meterValue += 0.0001f * numSamples;
+    // increase once per second, to show each strip frame
+    plugin->sampleCounter += numSamples;
 
-    if (plugin->meterValue > 10.f)
-        plugin->meterValue = 0.f;
+    while (plugin->sampleCounter >= plugin->samplesPerStep) {
+        plugin->sampleCounter -= plugin->samplesPerStep;
+        plugin->meterValue += 1.f;
+
+        if (plugin->meterValue > 299.f)
+            plugin->meterValue = 0.f;
+    }
 
     *plugin->meter = plugin->meterValue;
+    *plugin->value = plugin->meterValue;
 }
 
 static void lv2_cleanup(LV2_Handle handle)

@@ -1,0 +1,27 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2_preset1>
+    rdfs:label "Low Pass" ;
+    rdfs:comment "Cuts off mid + high frequencies" ;
+    lv2:port [
+        lv2:symbol "type" ;
+        pset:value 1 ;
+    ] ,
+    [
+        lv2:symbol "freq" ;
+        pset:value 400 ;
+    ] .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2_preset2>
+    rdfs:label "High Pass" ;
+    rdfs:comment "Cuts off low + mid frequencies" ;
+    lv2:port [
+        lv2:symbol "type" ;
+        pset:value 2 ;
+    ] ,
+    [
+        lv2:symbol "freq" ;
+        pset:value 2000 ;
+    ] .

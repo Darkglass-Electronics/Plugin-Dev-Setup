@@ -65,7 +65,20 @@ configure_file("DarkglassExampleFilterLV2.lv2/manifest.ttl.in"
                "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/manifest.ttl")
 
 configure_file("DarkglassExampleFilterLV2.lv2/DarkglassExampleFilterLV2.ttl"
-               "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/DarkglassExampleFilterLV2.ttl")
+               "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/DarkglassExampleFilterLV2.ttl"
+               COPYONLY)
+
+configure_file("DarkglassExampleFilterLV2.lv2/presets.ttl"
+               "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/presets.ttl"
+               COPYONLY)
+
+configure_file("DarkglassExampleFilterLV2.lv2/styling.ttl"
+               "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/styling.ttl"
+               COPYONLY)
+
+configure_file("DarkglassExampleFilterLV2.lv2/artwork/templates-button.png"
+               "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/artwork/templates-button.png"
+               COPYONLY)
 
 # TODO install block images in LV2 bundle
 #configure_file(anagram-block-off.png ${LV2_BUNDLE}/anagram-block-off.png COPYONLY)
