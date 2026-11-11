@@ -1,0 +1,23 @@
+@prefix dgcs: <http://www.darkglass.com/lv2/ns/lv2ext/custom-styling#> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+
+# Use custom-styling extension just to show a templates button on the top-bar
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2>
+    dgcs:blockSettings [
+        a dgcs:BlockSettings ;
+
+        # The top-bar background and buttons
+        # It is 1 layer above the background
+        dgcs:topBar [
+            a dgcs:BlockSettingsTopBar ;
+
+            # The top-bar templates button, for showing plugin presets (called 'templates' on Anagram)
+            dgcs:templatesButton [
+                a dgcs:Image ;
+                dgcs:path <artwork/templates-button.png> ;
+                # manual positioning required: we recommend 20px after plugin name
+                dgcs:alignment dgcs:alignLeftMid ;
+                dgcs:offsetX 425 ;
+            ] ;
+        ] ;
+    ] .

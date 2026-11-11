@@ -18,6 +18,8 @@ This plugin has 2 controls:
 
 The *Type* parameter influences the behaviour of the *Frequency* one.
 
+It also implements a "templates button" to be able to show plugin "factory" presets in a separate screen.
+
 ### Anagram specific properties
 
 This plugin implements the [Control Port State Update](https://github.com/Darkglass-Electronics/LV2-Extensions/blob/main/dg-control-port-state-update.lv2/control-port-state-update.h) extension to indicate that *Frequency* is "Inactive" when *Type* is "Off".

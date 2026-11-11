@@ -1,7 +1,18 @@
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2>
     a lv2:Plugin ;
     lv2:binary <DarkglassExampleFilterLV2${CMAKE_SHARED_LIBRARY_SUFFIX}> ;
-    rdfs:seeAlso <DarkglassExampleFilterLV2.ttl> .
+    rdfs:seeAlso <DarkglassExampleFilterLV2.ttl> , <styling.ttl> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2_preset1>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2> ;
+    rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2_preset2>
+    a pset:Preset ;
+    lv2:appliesTo <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2> ;
+    rdfs:seeAlso <presets.ttl> .
