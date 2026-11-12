@@ -106,7 +106,7 @@
    @see Plugin::initProgramName(uint32_t, String&)
    @see Plugin::loadProgram(uint32_t)
  */
-#define DISTRHO_PLUGIN_WANT_PROGRAMS 0
+#define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 
 /**
    Whether the plugin uses internal non-parameter data.
