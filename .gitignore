@@ -5,4 +5,4 @@ target/
 /lv2/
 .DS_Store
 Cargo.lock
-tiny-host
+lv2-validation/tiny-host/tiny-host

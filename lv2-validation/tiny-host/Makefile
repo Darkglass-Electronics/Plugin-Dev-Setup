@@ -9,7 +9,12 @@ BASE_FLAGS = -Wall -Wextra -pipe -Wno-unused-parameter
 BASE_OPTS  = -O3 -ffast-math $(shell pkg-config --cflags $(PKG))
 LIBS = $(shell pkg-config --libs $(PKG))
 
+# Linux options, unrecognized on MacOS
+ifeq ($(shell uname -s),Linux)
 LINK_OPTS  = -Wl,-O1 -Wl,--as-needed -Wl,--strip-all
+LINK_EXTRA = -Wl,--no-undefined
+endif
+
 BASE_FLAGS += -fPIC -DPIC
 
 ifeq ($(DEBUG),true)
@@ -22,7 +27,7 @@ endif
 
 BUILD_CXX_FLAGS = $(BASE_FLAGS) -std=c++17 $(CXXFLAGS) $(CPPFLAGS)
 
-LINK_FLAGS      = $(LINK_OPTS) -Wl,--no-undefined $(LDFLAGS)
+LINK_FLAGS      = $(LINK_OPTS) $(LINK_EXTRA) $(LDFLAGS)
 
 NAME = tiny-host
 
