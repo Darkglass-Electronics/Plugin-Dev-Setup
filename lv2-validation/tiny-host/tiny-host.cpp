@@ -271,7 +271,13 @@ int main(int argc, char* argv[])
              ? "In ttl but binary does NOT provide it (mismatch!)\n"
              : "Binary provides it but ttl does NOT declare it (mismatch!)\n";
     }
-    if (licenseLegacyInTtl != !!lilv_instance_get_extension_data(instance, license_interface_legacy)) {
+    if (licenseInTtl && licenseLegacyInTtl) {
+        msg += "Declared both license extensions, but only 1 at a time should be used\n";
+    }
+    if (!licenseInTtl && licenseLegacyInTtl) {
+        msg += "Using old MOD license extensions, please update to use libnickel from Darkglass\n";
+    }
+    if (!licenseInTtl && licenseLegacyInTtl != !!lilv_instance_get_extension_data(instance, license_interface_legacy)) {
         msg += "Declared extension: ";
         msg += license_interface_legacy;
         msg += "\n  - ";
