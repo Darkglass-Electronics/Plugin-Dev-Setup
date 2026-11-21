@@ -86,13 +86,22 @@ This allows, for example, for one parameter to turn off another, creating a link
 
 See [examples/lv2-filter-cmake/](examples/lv2-filter-cmake) for an example plugin that uses this feature.
 
+#### http://www.darkglass.com/lv2/ns/lv2ext/custom-styling
+
+Custom LV2 extension from Darkglass to allow styling of the block image and settings.  
+This allows for customizing the block image and settings with static image assets.
+
+See [examples/lv2-custom-styling/](examples/lv2-custom-styling) for an example plugin that uses this custom styling.
+
+#### http://www.darkglass.com/lv2/ns/lv2ext/license
+
+Custom LV2 extension for doing device-specific copy-protection and fetching a plugin license files.
+
+See [LICENSING.md](LICENSING.md) for more details.
+
 #### http://kx.studio/ns/lv2ext/control-input-port-change-request
 
 Custom LV2 extension from the KXStudio project that allows a plugin to request changes to the value of a control input port.
-
-#### http://moddevices.com/ns/ext/license#feature
-
-Custom LV2 extension from the MOD Devices / MOD Audio project for fetching a commercial plugin license file.
 
 ## Parameter designations
 
@@ -293,6 +302,11 @@ The parameter MUST NOT have 0 as a valid value in its range.
 #### [pprops:notOnGUI](http://lv2plug.in/ns/ext/port-props#notOnGUI)
 
 Hides the parameter from the user and does not save it as part of the preset.
+
+#### [dg:expressionPedalControl](http://www.darkglass.com/lv2/ns#expressionPedalControl)
+
+Marks the parameter suitable for expression pedal use.
+The Anagram brings a pop-up for expression-pedal binding when the plugin is loaded by the user.
 
 #### [dg:mayUpdateBlockedState](http://www.darkglass.com/lv2/ns#mayUpdateBlockedState)
 
