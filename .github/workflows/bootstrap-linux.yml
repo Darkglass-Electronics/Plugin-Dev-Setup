@@ -3,7 +3,7 @@ name: bootstrap-linux
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 7
+  CACHE_VERSION: 8
   CT_ALLOW_BUILD_AS_ROOT_SURE: 1
   DEBIAN_FRONTEND: noninteractive
   FORCE_UNSAFE_CONFIGURE: 1
@@ -12,9 +12,10 @@ jobs:
   bootstrap:
     strategy:
       matrix:
-        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04]
+        container: [debian:12, debian:13, ubuntu:22.04, ubuntu:24.04, ubuntu:26.04]
         platform: [darkglass-anagram, darkglass-anagram-debug, darkglass-anagram-gcc15]
-    runs-on: ubuntu-latest
+        runsOn: [ubuntu-26.04, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.runsOn }}
     container:
       image: ${{ matrix.container }}
     steps:

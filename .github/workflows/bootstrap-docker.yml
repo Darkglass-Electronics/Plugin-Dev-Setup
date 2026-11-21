@@ -3,14 +3,15 @@ name: bootstrap-docker
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 15
+  CACHE_VERSION: 16
 
 jobs:
   bootstrap:
     strategy:
       matrix:
         debug: [false, true]
-    runs-on: ubuntu-latest
+        runsOn: [ubuntu-26.04, ubuntu-26.04-arm]
+    runs-on: ${{ matrix.runsOn }}
     steps:
       - uses: actions/checkout@v7
       - name: Set DEBUG_SUFFIX
