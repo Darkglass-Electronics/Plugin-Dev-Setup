@@ -118,7 +118,7 @@ Here is how Ignissor does its dynamic compression metering:
 
 ## Block Settings
 
-Pretty much everything in the block settings can be stylized, but one notable exception as of KosmOS v1.14 are the peakmeters.
+Pretty much everything in the block settings can be stylized, but one notable exception as of KosmOS v1.19 are the peakmeters.
 
 While we allow custom styling, for the sake of consistency and good user experience, we do not allow reposition of certain UI components.
 These include everything in the top-bar and non-knobs-aligned parameters.
