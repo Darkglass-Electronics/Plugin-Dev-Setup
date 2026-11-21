@@ -109,6 +109,37 @@ The following control port designations are supported:
 
 > NOTE: the href target is the designation URI, not always a valid URL.
 
+#### [dg:hold](http://www.darkglass.com/lv2/ns#hold)
+
+Set this parameter as the main "hold" parameter of a plugin.
+
+When the parameter is of hold type it will always be "off" (at minimum) and temporarily be "on" (at maximum) when pressed down or "hold".
+
+The Anagram will bring a pop-up for footswitch "hold" binding when a plugin with this designation is loaded by the user.
+
+Special rules:
+ - Must have `dg:hold` in its port properties
+ - Must have default equal to minimum
+
+For a smoother compatibility / experience (e.g. for hosts outside of Anagram) we recommend that "hold" parameters are also "toggled".
+
+```ttl
+@prefix dg: <http://www.darkglass.com/lv2/ns#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+# ...
+lv2:port [
+  a lv2:InputPort, lv2:ControlPort ;
+  lv2:index 4 ;
+  lv2:symbol "freeze" ;
+  lv2:name "Freeze" ;
+  lv2:designation dg:hold ;
+  lv2:portProperty lv2:integer , lv2:toggled , dg:hold ;
+  lv2:default 0 ;
+  lv2:minimum 0 ;
+  lv2:maximum 1 ;
+] ;
+```
+
 #### [dg:quickPot](http://www.darkglass.com/lv2/ns#quickPot)
 
 Set this parameter as the Quick Pot for a plugin.
@@ -279,7 +310,7 @@ The following control port and/or parameter properties are supported:
 
 #### [lv2:toggled](http://lv2plug.in/ns/lv2core#toggled)
 
-Makes the parameter appear as a on/off toggle
+Makes the parameter appear as a on/off toggle.
 
 #### [lv2:integer](http://lv2plug.in/ns/lv2core#integer)
 
@@ -308,6 +339,15 @@ Hides the parameter from the user and does not save it as part of the preset.
 Marks the parameter suitable for expression pedal use.
 
 The Anagram will bring a pop-up for expression-pedal binding when a plugin with this port property is loaded by the user.
+
+#### [dg:hold](http://www.darkglass.com/lv2/ns#hold)
+
+Makes the parameter appear as pressed/released "hold" button.
+
+When the parameter is of hold type the Control Port default value MUST be equal to the minimum.
+The host will change it to maximum temporarily while pressed and automatically revert to the default / minimum when released.
+
+This property can also be used as a designation, to indicate the main hold parameter of a plugin.
 
 #### [dg:mayUpdateBlockedState](http://www.darkglass.com/lv2/ns#mayUpdateBlockedState)
 
