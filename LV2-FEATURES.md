@@ -306,7 +306,8 @@ Hides the parameter from the user and does not save it as part of the preset.
 #### [dg:expressionPedalControl](http://www.darkglass.com/lv2/ns#expressionPedalControl)
 
 Marks the parameter suitable for expression pedal use.
-The Anagram brings a pop-up for expression-pedal binding when the plugin is loaded by the user.
+
+The Anagram will bring a pop-up for expression-pedal binding when a plugin with this port property is loaded by the user.
 
 #### [dg:mayUpdateBlockedState](http://www.darkglass.com/lv2/ns#mayUpdateBlockedState)
 
