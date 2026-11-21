@@ -24,6 +24,8 @@ It is also possible to create LV2 plugins using [rust](https://docs.rs/lv2/lates
 
 ## Documentation
 
+See [BLOCK-IMAGES.md](BLOCK-IMAGES.md) for basic guidelines regarding block images.
+
 See [BUILDING.md](BUILDING.md) for instructions on how to build your plugin binaries.
 
 See [CATEGORIES.md](CATEGORIES.md) for the list of plugin categories used in Anagram and how it translates from LV2 ones.
