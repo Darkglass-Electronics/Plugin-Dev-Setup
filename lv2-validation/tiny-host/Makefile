@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
-# Makefile for mod-cv-randoms.lv2 #
-# --------------------------------- #
+# Makefile for tinyhost #
+# --------------------- #
 
 CXX ?= g++
 PKG = lilv-0
