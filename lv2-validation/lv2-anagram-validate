@@ -879,9 +879,6 @@ def get_plugins_info(bundles):
     # Create our own unique lilv world
     # We'll load the selected bundles and get all plugins from it
     world = lilv.World()
-    # this is needed when loading specific bundles instead of load_all
-    world.load_specifications()
-    world.load_plugin_classes()
 
     # Check if we are running in docker DEBUG image
     anagram_target_dir = ""
@@ -920,6 +917,15 @@ def get_plugins_info(bundles):
             bundlenode = world.new_file_uri(None, bundle_for_lilv)
             # load the bundle
             world.load_bundle(bundlenode)
+
+        # load extra specifications
+        for bundle in ("/usr/lib/lv2/dg-properties.lv2", "/usr/lib/lv2/kx-properties.lv2"):
+            bundlenode = world.new_file_uri(None, system_dir + bundle + os.sep)
+            world.load_bundle(bundlenode)
+
+        # this is needed when loading specific bundles instead of load_all
+        world.load_specifications()
+        world.load_plugin_classes()
 
     # get all plugins available in the selected bundles
     plugins = world.get_all_plugins()
