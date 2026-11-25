@@ -1,6 +1,6 @@
 /*
  * Example plugin for Anagram using raw LV2
- * Copyright (C) 2025 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2025-2026 Filipe Coelho <falktx@falktx.com>
  * SPDX-License-Identifier: ISC
  */
 
@@ -17,7 +17,14 @@
 
 #include "dg-control-port-state-update.lv2/control-port-state-update.h"
 
+// use libnickel licensing mechanism when building for Anagram (codenamed pablito)
+#if _DARKGLASS_DEVICE_PABLITO
+#include <libnickel.h>
+#endif
+
 #include <array>
+
+#define EXAMPLE_PLUGIN_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2"
 
 class ExampleFilter
 {
@@ -69,6 +76,11 @@ class ExampleFilter
     std::array<float, bufferSize> bufLP;
     std::array<float, bufferSize> bufHP;
 
+   #if _DARKGLASS_DEVICE_PABLITO
+    // counter for the licensing mechanism
+    uint32_t runFrameCount = 0;
+   #endif
+
     // reset filters and flush smooth values
     void reset()
     {
@@ -78,6 +90,11 @@ class ExampleFilter
         smoothEnabled.clearToTargetValue();
         for (uint8_t i = 0; i < kFreqCount; ++i)
             smoothFilters[i].clearToTargetValue();
+
+       #if _DARKGLASS_DEVICE_PABLITO
+        // also reset the licensing run counter
+        runFrameCount = 0;
+       #endif
     }
 
 public:
@@ -85,6 +102,17 @@ public:
         : lp(sampleRate),
           hp(sampleRate)
     {
+        #if _DARKGLASS_DEVICE_PABLITO
+         // check for the license of this plugin
+         if (! nickel_init(sampleRate, features, EXAMPLE_PLUGIN_URI))
+         {
+             // if no license (or unsupported host), try the Anagram (codenamed pablito) device key too
+             // since this is a free plugin, so we want to accept the device key
+             // NOTE for commercial plugins make sure to remove the next line!
+             nickel_init(sampleRate, features, "urn:darkglass:pablito");
+         }
+        #endif
+
         portStateUpdate = static_cast<LV2_Control_Port_State_Update*>(
             lv2_features_data(features, LV2_CONTROL_PORT_STATE_UPDATE_URI));
 
@@ -160,6 +188,10 @@ public:
         if (d_isNotZero(*paramReset))
             reset();
 
+        #if _DARKGLASS_DEVICE_PABLITO
+         runFrameCount = nickel_license_run_begin(runFrameCount, numSamples);
+        #endif
+
         // process audio in chunks
         for (uint32_t offset = 0; offset < numSamples; offset += bufferSize)
         {
@@ -191,6 +223,10 @@ public:
                 out[offset + i] = proc * mix + in[offset + i] * (1.f - mix);
             }
         }
+
+        #if _DARKGLASS_DEVICE_PABLITO
+         nickel_license_run_silence(runFrameCount, out, numSamples, 0);
+        #endif
     }
 };
 
@@ -198,7 +234,7 @@ LV2_SYMBOL_EXPORT
 const LV2_Descriptor* lv2_descriptor(uint32_t index)
 {
     static const LV2_Descriptor descriptor {
-        .URI = "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2",
+        .URI = EXAMPLE_PLUGIN_URI,
         .instantiate = [](const struct LV2_Descriptor*,
                           double sampleRate,
                           const char*,
@@ -225,7 +261,11 @@ const LV2_Descriptor* lv2_descriptor(uint32_t index)
         },
         .extension_data = [](const char* uri) -> const void*
         {
+           #if _DARKGLASS_DEVICE_PABLITO
+            return nickel_license_interface(uri);
+           #else
             return nullptr;
+           #endif
         }
     };
     return index == 0 ? &descriptor : nullptr;

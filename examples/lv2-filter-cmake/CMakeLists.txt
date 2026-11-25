@@ -60,6 +60,11 @@ target_include_directories(DarkglassExampleFilterLV2
         ${lv2-extensions_SOURCE_DIR}
 )
 
+# Use libnickel licensing mechanism when cross-compiling for Anagram
+if(CMAKE_CROSSCOMPILING_EMULATOR)
+target_link_libraries(DarkglassExampleFilterLV2 PUBLIC nickel)
+endif()
+
 # install ttl data
 configure_file("DarkglassExampleFilterLV2.lv2/manifest.ttl.in"
                "${CMAKE_CURRENT_BINARY_DIR}/DarkglassExampleFilterLV2.lv2/manifest.ttl")

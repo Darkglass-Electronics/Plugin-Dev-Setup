@@ -14,6 +14,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// use libnickel licensing mechanism when building for Anagram (codenamed pablito)
+#if _DARKGLASS_DEVICE_PABLITO
+#include <libnickel.h>
+#endif
+
+#define EXAMPLE_PLUGIN_URI "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling"
+
 // all ports of this plugin, matching the ttl side
 typedef enum {
     kPortInput,
@@ -34,11 +41,16 @@ typedef enum {
 typedef struct {
     const float* in;
     float* out;
+    const float* reset;
     float* meter;
     float* value;
     float meterValue;
     uint32_t samplesPerStep;
     uint32_t sampleCounter;
+   #if _DARKGLASS_DEVICE_PABLITO
+    // counter for the licensing mechanism
+    uint32_t runFrameCount;
+   #endif
 } ExamplePlugin;
 
 static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
@@ -46,6 +58,16 @@ static LV2_Handle lv2_instantiate(const struct LV2_Descriptor* descriptor,
                                   const char* bundlepath,
                                   const LV2_Feature* const* features)
 {
+   #if _DARKGLASS_DEVICE_PABLITO
+    // check for the license of this plugin
+    if (! nickel_init(sampleRate, features, EXAMPLE_PLUGIN_URI))
+    {
+        // if no license (or unsupported host), try the Anagram (codenamed pablito) device key too
+        // since this is a free plugin, so we want to accept the device key
+        // NOTE for commercial plugins make sure to remove the next line!
+        nickel_init(sampleRate, features, "urn:darkglass:pablito");
+    }
+   #endif
     ExamplePlugin* plugin = calloc(1, sizeof(ExamplePlugin));
     if (plugin != NULL)
         plugin->samplesPerStep = (uint32_t)sampleRate;
@@ -63,6 +85,9 @@ static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
     case kPortOutput:
         plugin->out = data;
         break;
+    case kPortReset:
+        plugin->reset = data;
+        break;
     case kPortMeter:
         plugin->meter = data;
         break;
@@ -75,6 +100,13 @@ static void lv2_connect_port(LV2_Handle handle, uint32_t port, void* data)
 static void lv2_run(LV2_Handle handle, uint32_t numSamples)
 {
     ExamplePlugin* plugin = handle;
+
+   #if _DARKGLASS_DEVICE_PABLITO
+    if (*plugin->reset > 0.f)
+        plugin->runFrameCount = 0;
+
+    plugin->runFrameCount = nickel_license_run_begin(plugin->runFrameCount, numSamples);
+   #endif
 
     if (plugin->out != plugin->in)
         memcpy(plugin->out, plugin->in, sizeof(float) * numSamples);
@@ -92,6 +124,10 @@ static void lv2_run(LV2_Handle handle, uint32_t numSamples)
 
     *plugin->meter = plugin->meterValue;
     *plugin->value = plugin->meterValue;
+
+   #if _DARKGLASS_DEVICE_PABLITO
+    nickel_license_run_silence(plugin->runFrameCount, plugin->out, numSamples, 0);
+   #endif
 }
 
 static void lv2_cleanup(LV2_Handle handle)
@@ -99,15 +135,25 @@ static void lv2_cleanup(LV2_Handle handle)
     free(handle);
 }
 
+static const void* lv2_extension_data(const char* uri)
+{
+   #if _DARKGLASS_DEVICE_PABLITO
+    return nickel_license_interface(uri);
+   #else
+    return NULL;
+   #endif
+}
+
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor* lv2_descriptor(uint32_t index)
 {
     static const LV2_Descriptor descriptor = {
-        .URI = "https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-styling",
+        .URI = EXAMPLE_PLUGIN_URI,
         .instantiate = lv2_instantiate,
         .connect_port = lv2_connect_port,
         .run = lv2_run,
         .cleanup = lv2_cleanup,
+        .extension_data = lv2_extension_data,
     };
     return index == 0 ? &descriptor : NULL;
 }

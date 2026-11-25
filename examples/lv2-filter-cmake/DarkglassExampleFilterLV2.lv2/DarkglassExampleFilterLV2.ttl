@@ -1,6 +1,7 @@
 @prefix dg:    <http://www.darkglass.com/lv2/ns#> .
 @prefix doap:  <http://usefulinc.com/ns/doap#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix licns: <http://www.darkglass.com/lv2/ns/lv2ext/license#> .
 @prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
 @prefix midi:  <http://lv2plug.in/ns/ext/midi#> .
 @prefix mod:   <http://moddevices.com/ns/mod#> .
@@ -15,7 +16,13 @@
 <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2>
     a lv2:FilterPlugin, lv2:Plugin, doap:Project ;
 
-    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ,
+    licns:uri <https://github.com/Darkglass-Electronics/Plugin-Dev-Setup#example-filter-lv2> ,
+              <urn:darkglass:pablito> ;
+
+    lv2:extensionData licns:interface ;
+
+    lv2:optionalFeature licns:feature ,
+                        lv2:hardRTCapable ,
                         <http://www.darkglass.com/lv2/ns/lv2ext/control-port-state-update> ;
 
     lv2:port [
